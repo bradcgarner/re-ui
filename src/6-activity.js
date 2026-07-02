@@ -8,6 +8,7 @@ import Reminder from './999-reminder';
 
 export default function Activity(props) {
 
+	const x = 1; // testing 
 	const {
 		listActivities,
 		listFus,
@@ -20,7 +21,7 @@ export default function Activity(props) {
 		activity,
 		optionsHash,
 		dealStatusHash,
-		valueListsHash,
+		valueListsHash, 
 		referralHash,
 		vpReferenceHash,
 		vpStatusHash,
