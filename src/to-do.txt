@@ -1,0 +1,15 @@
+
+
+
+Add a vendor partner widget including the references
+
+Add a shortcut for today's daily plan if exist
+
+Add a search for overdue follow
+
+In the app detect whether an activity is a follow up on the activity screen and show the follow up Fields if it is a follow up
+
+Core values widget
+
+Dale Archdekin widget
+
