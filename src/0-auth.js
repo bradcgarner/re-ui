@@ -59,6 +59,7 @@ export default function Auth(props) {
 				const authToken = typeof r.authToken === 'string' ? r.authToken : null ;
 				if(authToken){
 					localStorage.setItem('authToken', authToken);
+					setLoginMode('done')
 				} else {
 					console.error('no auth token returned');
 				}
