@@ -15,8 +15,8 @@ export default function VendorPartner(props) {
 		optionsHash,
 	} = props;
 
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	const printDate = d => {
 		return convertTimestampToString(d, 'dow d M y')
@@ -38,7 +38,6 @@ export default function VendorPartner(props) {
 			<div onClick={()=>listContacts()} className="major-button">
 				<p className="major-button-text">Back to List Contacts</p>
 			</div>
-
 			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
 				<p className='major-button-text'>
 					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
@@ -55,6 +54,16 @@ export default function VendorPartner(props) {
 		<Instructions show={showInstructions}
 			text={''}/>
 
-		<p>{JSON.stringify(contact,null,2)}</p>
+		<div className='divider'/>
+				
+		<div onClick={()=>saveContact()} className='major-button'>
+			<p className='major-button-text'>SAVE</p>
+		</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		<div onClick={()=>listContacts()} className="major-button">
+			<p className="major-button-text">Back to List Contacts</p>
+		</div>
 	</div>
 }

@@ -143,7 +143,7 @@ function App() {
 
 	// @@@@@@@@@@@ STATE @@@@@@@@@@@
 
-	const [id_agent, setIdAgent] = useState(1); // update based on login
+	const [id_agent] = useState(parseInt(localStorage.id_agent, 10)); // update based on login
 
 	const [hasLoaded, setHasLoaded] = useState(false);
 	const [valueListsHash, setValueListsHash] = useState({});
@@ -209,6 +209,9 @@ function App() {
 		id_who_introduced_temp: true,
 	};
 	const inputFormatOptions = {
+		stringArraySignatures: [ // string is default. only need to populate if a string key contains a subset of another key type
+			'contact_where_met_notes',
+		],
 		numberSignatures: [
 			'deal_gci',
 			'deal_value',
@@ -237,7 +240,8 @@ function App() {
 			'convo_voice_note',
 			'convo_problem_solve',
 			'convo_deal_found',
-
+			'convo_outcome',
+			
 			'contact_how_met',
 			'contact_where_met',
 			'contact_type',

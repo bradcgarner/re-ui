@@ -214,6 +214,10 @@ export const theFields = {
 			fd: 'vl',
 		},
 		{
+			fieldName: 'fu_notes', 
+			label: 'notes', 
+		},
+		{
 			fieldName: 'timestamp_created', 
 			fd: 'date'
 		},
@@ -327,6 +331,16 @@ export const theFields = {
 			label: 'name', 
 		},
 		{
+			fieldName: 'deal_stage', 
+			label: 'stage', 
+			fd: 'vl'
+		},
+		{
+			fieldName: 'deal_value', 
+			label: 'value', 
+			fd: 'dollar'
+		},
+		{
 			fieldName: 'deal_address', 
 			label: 'address', 
 		},
@@ -351,11 +365,6 @@ export const theFields = {
 			fd: 'vl'
 		},
 		{
-			fieldName: 'deal_stage', 
-			label: 'stage', 
-			fd: 'vl'
-		},
-		{
 			fieldName: 'deal_timeline_stated', 
 			label: 'timeline stated', 
 			fd: 'vl'
@@ -373,11 +382,6 @@ export const theFields = {
 			fieldName: 'deal_value_status', 
 			label: 'value status', 
 			fd: 'vl'
-		},
-		{
-			fieldName: 'deal_value', 
-			label: 'value', 
-			fd: 'dollar'
 		},
 		{
 			fieldName: 'deal_commission_rate', 

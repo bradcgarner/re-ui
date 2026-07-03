@@ -36,8 +36,8 @@ export default function Activity(props) {
 		openActivity,
 	} = props;
 
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	const date_convo = isObjectLiteral(activity.date_convo) ? activity.date_convo : {};
 	const contacts = Array.isArray(activity.contacts) ? activity.contacts : [];
@@ -70,31 +70,29 @@ export default function Activity(props) {
 
 		<h2 className='page-header'>ACTIVITY</h2>
 
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		{
+			modePrior === 'activities' ?
+			<div onClick={()=>listActivities()} className="major-button">
+				<p className="major-button-text">Back to Activities List</p>
+			</div> :
+			<div onClick={()=>listFus()} className="major-button">
+				<p className="major-button-text">Back to Follow-Up List</p>
 			</div>
-			{
-				modePrior === 'activities' ?
-				<div onClick={()=>listActivities()} className="major-button">
-					<p className="major-button-text">Back to Activities List</p>
-				</div> :
-				<div onClick={()=>listFus()} className="major-button">
-					<p className="major-button-text">Back to Follow-Up List</p>
-				</div>
-			}
+		}
 
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-				<p className='major-button-text'>
-					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-				</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-				<p className='major-button-text'>
-					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-				</p>
-			</div>
+		<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
+			<p className='major-button-text'>
+				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
+			</p>
+		</div>
+		<p>&nbsp;</p>
+		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
+			<p className='major-button-text'>
+				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
+			</p>
 		</div>
 
 
@@ -110,8 +108,8 @@ export default function Activity(props) {
 			<div className='date-container'>	
 				<label className='edit-label'>
 					<select className='edit-input edit-input-date'
-						value={date_convo.date_convo_month || ''}
-						style={formatStyle(date_convo.date_convo_month)}
+						value={isPrimitiveNumber(date_convo.date_convo_month) ? date_convo.date_convo_month : ''}
+						style={formatStyle(date_convo.date_convo_month, true)}
 						onChange={e=>handleActivityChange('date_convo',null,'date_convo_month',null, e.target.value)}>
 							{optionsHash.months}
 					</select>
@@ -167,7 +165,7 @@ export default function Activity(props) {
 
 		{
 			contacts.length > 0 ? contacts.map((c,i)=>{
-				return <div key={i} className='display-group display-multi-group'>
+				return <div key={i} className='display-group display-multi-group contact-group'>
 					{
 						isPrimitiveNumber(c.id_contact) ?
 							<label className='edit-label'>
@@ -235,7 +233,7 @@ export default function Activity(props) {
 								Who First Introduced Me To {c.contact_name_first || 'Them'}?
 								<select className='edit-input edit-input-wide-nest'
 									value={c.id_who_introduced || ''}
-									style={formatPresetStyle(c.id_who_introduced)}
+									style={formatStyle(c.id_who_introduced)}
 									onChange={e=>handleActivityChange('contacts',i, 'id_who_introduced',null, e.target.value)}>
 										{optionsHash.contact}
 								</select>
@@ -296,10 +294,8 @@ export default function Activity(props) {
 			}) : null
 		}
 
-		<div className='display-group'>
-			<div onClick={()=>addContactToActivity('main')} className='minor-button'>
-				<p className='minor-button-text'>ADD A CONTACT</p>
-			</div>
+		<div onClick={()=>addContactToActivity('main')} className='minor-button'>
+			<p className='minor-button-text'>ADD A CONTACT</p>
 		</div>
 
 		<div className='divider'/>
@@ -393,6 +389,15 @@ export default function Activity(props) {
 				</select>
 			</label>
 			<label className='edit-label'>
+				How Did The Conversation Go?
+				<select className='edit-input edit-input-wide'
+					value={activity.convo_outcome || ''}
+					style={formatPresetStyle(activity.convo_outcome)}
+					onChange={e=>handleActivityChange('convo_outcome',null,null,null, e.target.value)}>
+						{optionsHash['ranking']}
+				</select>
+			</label>
+			<label className='edit-label'>
 				Conversation Notes
 				<textarea className='edit-input edit-input-wide edit-textarea'
 					value={activity.convo_notes || ''}
@@ -436,7 +441,7 @@ export default function Activity(props) {
 				const valueToPrint = isPrimitiveNumber(d.deal_value) ? `$${numberWithCommas(d.deal_value)}`: '';
 				const gciToPrint = isPrimitiveNumber(d.deal_gci) ? `$${numberWithCommas(d.deal_gci)}`: '';
 
-				return <div key={i} className='display-group display-multi-group'>
+				return <div key={i} className='display-group display-multi-group deal-group'>
 					{
 						isPrimitiveNumber(d.id_deal) ?
 							<label className='edit-label'>
@@ -529,8 +534,8 @@ export default function Activity(props) {
 					<div className='date-container'>
 						<label className='edit-label'>
 							<select className='edit-input edit-input-date'
-								value={date_deal.date_deal_month || ''}
-								style={formatStyle(date_deal.date_deal_month)}
+								value={isPrimitiveNumber(date_deal.date_deal_month) ? date_deal.date_deal_month : ''}
+								style={formatStyle(date_deal.date_deal_month, true)}
 								onChange={e=>handleActivityChange('deals',i, 'date_deal','date_deal_month', e.target.value)}>
 									{optionsHash.months}
 							</select>
@@ -598,7 +603,7 @@ export default function Activity(props) {
 						text={`Enter all relevant notes, motivations, conditions, obstacles, fears, wants, needs, and desires.`}/>
 
 					<DevNotes show={showDevNotes}
-						text={`id_agent {d.id_agent}; id_deal {d.id_deal}; id_deal_temp {d.id_deal_temp}; id_ad {d.id_ad};`} />
+						text={`id_agent ${d.id_agent}; id_deal ${d.id_deal}; id_deal_temp ${d.id_deal_temp}; id_ad ${d.id_ad};`} />
 						
 					{
 						d.id_deal ?
@@ -615,10 +620,8 @@ export default function Activity(props) {
 		
 		{
 			!!dealLinkButtonStatus ?
-			<div className='display-group'>
-				<div onClick={()=>addDealToActivity()} className='minor-button'>
-					<p className='minor-button-text'>ADD A DEAL</p>
-				</div>
+			<div onClick={()=>addDealToActivity()} className='minor-button'>
+				<p className='minor-button-text'>ADD A DEAL</p>
 			</div> : null 
 		}
 
@@ -634,7 +637,7 @@ export default function Activity(props) {
 		
 		{
 			connections.length > 0 ? connections.map((c,i)=>{
-				return <div key={i} className='display-group display-multi-group'>
+				return <div key={i} className='display-group display-multi-group contact-group'>
 					{
 						isPrimitiveNumber(c.id_contact) ?
 							<label className='edit-label'>
@@ -794,10 +797,8 @@ export default function Activity(props) {
 			}) : null
 		}
 
-		<div className='display-group'>
-			<div onClick={()=>addContactToActivity('connection')} className='minor-button'>
-				<p className='minor-button-text'>ADD A CONNECTION</p>
-			</div>
+		<div onClick={()=>addContactToActivity('connection')} className='minor-button'>
+			<p className='minor-button-text'>ADD A CONNECTION</p>
 		</div>
 
 		<div className='divider'/>
@@ -812,14 +813,14 @@ export default function Activity(props) {
 		{
 			fus.length > 0 ? fus.map((fu,i)=>{
 				const date_fu = fu.date_fu || {};
-				return <div key={i} className='display-group display-multi-group'>
+				return <div key={i} className='display-group display-multi-group fu-group'>
 					<div className='display-group'>
 						<p>Schedule Follow-Up For {date_fu.dateString}</p>
 						<div className='date-container'>
 							<label className='edit-label'>
 								<select className='edit-input edit-input-date'
-									value={date_fu.date_fu_month || ''}
-									style={formatStyle(date_fu.date_fu_month)}
+									value={isPrimitiveNumber(date_fu.date_fu_month) ? date_fu.date_fu_month : ''}
+									style={formatStyle(date_fu.date_fu_month, true)}
 									onChange={e=>handleActivityChange('fus',i, 'date_fu', 'date_fu_month', e.target.value)}>
 										{optionsHash.months}
 								</select>
@@ -897,10 +898,19 @@ export default function Activity(props) {
 					</label>
 
 					<DevNotes show={showDevNotes}
-						text={`THIS ACTIVITY: id_agent ${activity.id_agent}; id_activity ${activity.id_activity}; id_activity_temp ${fu.id_activity_temp};`} />
+						text={[`THIS ACTIVITY: id_agent ${activity.id_agent}`,
+							`id_activity ${activity.id_activity}`,
+							`id_activity_temp ${activity.id_activity_temp}`]} />
 
 					<DevNotes show={showDevNotes}
-						text={`FOLLOW-UP id_agent ${fu.id_agent}; id_activity ${fu.id_activity}; id_activity_temp ${fu.id_activity_temp}; id_activity_fu ${fu.id_activity_fu}; id_deal_fu ${fu.id_deal_fu}; id_deal_fu_temp ${fu.id_deal_fu_temp}; id_contact_fu ${fu.id_contact_fu}; id_contact_fu_temp ${fu.id_contact_fu_temp}`} />
+						text={[`FOLLOW-UP id_agent ${fu.id_agent}`,
+							`id_activity ${fu.id_activity}`,
+							`id_activity_temp ${fu.id_activity_temp}`,
+							`id_activity_fu ${fu.id_activity_fu}`,
+							`id_deal_fu ${fu.id_deal_fu}`,
+							`id_deal_fu_temp ${fu.id_deal_fu_temp}`,
+							`id_contact_fu ${fu.id_contact_fu}`,
+							`id_contact_fu_temp ${fu.id_contact_fu_temp}`]} />
 				
 					{
 						fu.id_activity ?
@@ -914,25 +924,27 @@ export default function Activity(props) {
 			}) : null
 		}
 
-		<div className='display-group'>
-			<div onClick={()=>addFuToActivity()} className='minor-button'>
-				<p className='minor-button-text'>ADD A FOLLOW-UP	</p>
-			</div>
+		<div onClick={()=>addFuToActivity()} className='minor-button'>
+			<p className='minor-button-text'>ADD A FOLLOW-UP	</p>
 		</div>
 
 		<div className='divider'/>
 				
-		<div className='display-group'>
-			<div onClick={()=>saveActivity()} className='major-button'>
-				<p className='major-button-text'>SAVE</p>
-			</div>
+		<div onClick={()=>saveActivity()} className='major-button'>
+			<p className='major-button-text'>SAVE</p>
 		</div>
-
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
 		</div>
+		{
+			modePrior === 'activities' ?
+			<div onClick={()=>listActivities()} className="major-button">
+				<p className="major-button-text">Back to Activities List</p>
+			</div> :
+			<div onClick={()=>listFus()} className="major-button">
+				<p className="major-button-text">Back to Follow-Up List</p>
+			</div>
+		}
 
 		<Instructions show={showInstructions}
 			text={`You may save at any point AFTER you enter at least one contact and a date. After saving, you remain on this screen until you click "BACK TO MAIN MENU". If you leave this page, you may return to the page and continue editing after you save. This page does not save real-time.`}/>

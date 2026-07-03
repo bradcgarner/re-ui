@@ -25,8 +25,8 @@ export default function Deal(props) {
 		openContact,
 	} = props;
 
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	const d = deal;
 	const activities = Array.isArray(d.activities) ? d.activities : [];
@@ -49,25 +49,22 @@ export default function Deal(props) {
 
 		<h2 className='page-header'>DEAL</h2>
 
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
-			<div onClick={()=>listDeals()} className="major-button">
-				<p className="major-button-text">Back to List Deals</p>
-			</div>
-
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-				<p className='major-button-text'>
-					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-				</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-				<p className='major-button-text'>
-					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-				</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		<div onClick={()=>listDeals()} className="major-button">
+			<p className="major-button-text">Back to List Deals</p>
+		</div>
+		<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
+			<p className='major-button-text'>
+				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
+			</p>
+		</div>
+		<p>&nbsp;</p>
+		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
+			<p className='major-button-text'>
+				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
+			</p>
 		</div>
 
 		<Instructions show={showInstructions}
@@ -154,8 +151,8 @@ export default function Deal(props) {
 			<div className='date-container'>
 				<label className='edit-label'>
 					<select className='edit-input edit-input-date'
-						value={date_deal.date_deal_month || ''}
-						style={formatStyle(date_deal.date_deal_month)}
+						value={isPrimitiveNumber(date_deal.date_deal_month) ? date_deal.date_deal_month : ''}
+						style={formatStyle(date_deal.date_deal_month, true)}
 						onChange={e=>handleDealChange('date_deal_month', e.target.value)}>
 							{optionsHash.months}
 					</select>
@@ -236,7 +233,7 @@ export default function Deal(props) {
 
 		{
 			contacts.map((c,i)=>{
-				return <div key={i} className='display-group display-multi-group'>
+				return <div key={i} className='display-group display-multi-group contact-group'>
 					<label className='edit-label'>
 						<input className='edit-input edit-input-wide-nest'
 							value={c.contact_name_first || ''}
@@ -312,7 +309,7 @@ export default function Deal(props) {
 			activities.map((a,i)=>{
 				const dateString = convertTimestampToString(a.date_convo_timestamp, 'dow d M y');
 
-				return <div className='display-group display-multi-group'>
+				return <div className='display-group display-multi-group fu-group'>
 					<label className='edit-label'>
 						<input className='edit-input edit-input-wide-nest'
 							style={formatStyle(dateString)}
@@ -348,5 +345,16 @@ export default function Deal(props) {
 
 			})
 		}
+		<div className='divider'/>
+				
+		<div onClick={()=>saveDeal()} className='major-button'>
+			<p className='major-button-text'>SAVE</p>
+		</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		<div onClick={()=>listDeals()} className="major-button">
+			<p className="major-button-text">Back to List Deals</p>
+		</div>
 	</div>
 }

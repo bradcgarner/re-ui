@@ -11,14 +11,13 @@ export default function Metrics(props) {
 		valueListsHash,
 	} = props;
 
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	return <div className='display-group'>
 
 		<h2 className='page-header'>METRICS</h2>
 
-		<div className='display-group'>
 			<div onClick={()=>goToMainMenu()} className='major-button'>
 				<p className='major-button-text'>BACK TO MAIN MENU</p>
 			</div>
@@ -34,9 +33,10 @@ export default function Metrics(props) {
 					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
 				</p>
 			</div>
-		</div>
 
-		<h2 className='page-header'>EXACTLY WHAT TO SAY</h2>
+		<div className='display-group'>
+
+		</div>
 
 		<Instructions show={showInstructions}
 			text={''}/>

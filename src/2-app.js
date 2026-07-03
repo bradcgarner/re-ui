@@ -13,7 +13,7 @@ import { scrollToTop } from 'browser-helpers';
 import { theFields } from './1-fields';
 import { coachContent } from './1-coach-content';
 
-import Landing from "./2-landing";
+import Landing from "./2-menu";
 import Activity from "./6-activity";
 import Contact from './7-contact';
 import Deal from './7-deal';
@@ -89,14 +89,13 @@ function App2(props) {
 	// @@@@@@@@@@@@@@@@@ GENERAL @@@@@@@@@@@@@@@@@@@@
 
 	const goToMainMenu = () => {
+		scrollToTop();
 		setMode('menu');
 	};
 
 	// @@@@@@@@@@@@@@@ PROFORMAE @@@@@@@@@@@@@@@@@@
 
 	const openProformae = openWidget => {
-
-		console.log('open proformae');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -120,7 +119,6 @@ function App2(props) {
 
 	const handleProformaeChange = (k, v) => {
 		const valueFormatted = correctInputType(v, k, inputFormatOptions);
-		console.log({k,v, valueFormatted});
 
 		const pfFields = {
 			pf_sale_price: true,
@@ -200,7 +198,6 @@ function App2(props) {
 	};
 
 	const saveProformae = () => {
-		console.log('save proformae');
 		const init = {
 			method: 'PUT',
 			headers: {
@@ -241,7 +238,6 @@ function App2(props) {
 	};
 
 	const listDailyPlans = () => {
-		console.log('list daily plans');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -263,7 +259,6 @@ function App2(props) {
 	};
 
 	const openDailyPlan = id_daily_plan => {
-		console.log('open daily plan');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -285,7 +280,6 @@ function App2(props) {
 
 	const handleDailyPlanChange= (k, v) => {
 		const valueFormatted = correctInputType(v, k, inputFormatOptions);
-		console.log({k,v, valueFormatted});
 
 		const dateFields = {
 			date_dp_year: true,
@@ -314,7 +308,6 @@ function App2(props) {
 	};
 
 	const saveDailyPlan = () => {
-		console.log('save daily plan');
 		const init = {
 			method: 'PUT',
 			headers: {
@@ -342,6 +335,7 @@ function App2(props) {
 	const createNewActivity = () => {
 		const dateToday = new Date();
 		const newActivity = {
+			id_agent,
 			id_activity_temp: convertTimestampToString(new Date(), 'd t z'),
 			date_convo: {
 				date_convo_year: dateToday.getFullYear(),
@@ -373,7 +367,6 @@ function App2(props) {
 	};
 
 	const listActivities = () => {
-		console.log('listActivities');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -403,7 +396,6 @@ function App2(props) {
 	};
 
 	const listFus = () => {
-		console.log('listFus');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -430,7 +422,6 @@ function App2(props) {
 	};
 
 	const openActivity = id_activity => {
-		console.log('openActivity');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -505,8 +496,7 @@ function App2(props) {
 		const valueFormatted = 
 			isATempId ? value :
 			correctInputType(value, finalField, inputFormatOptions);
-		// console.log({isATempId, value, valueFormatted})
-			const isADate = dateIntegerHash[finalField];
+		const isADate = dateIntegerHash[finalField];
 		const isGci = finalField === 'deal_value' || finalField === 'deal_commission_rate';
 		const isDealFound = finalField === 'deal_how_found';
 		const isConvoType = finalField === 'convo_main_purpose';
@@ -515,7 +505,6 @@ function App2(props) {
 		const isAContactChange = finalField === 'id_contact';
 		const isADealChange = finalField === 'id_deal';
 		const isADealTimeline = finalField === 'deal_timeline_stated';
-		console.log({one, index, two, three, finalField, value, valueFormatted,isGci})
 		const newActivity = JSON.parse(JSON.stringify(activity));
 
 		if(Array.isArray(newActivity[one])){
@@ -592,7 +581,6 @@ function App2(props) {
 							newActivity[one][index].date_deal.date_deal_timestamp = later;
 
 						}
-						// console.log({dealTimelineValueFound})
 					}
 				}
 			}
@@ -699,7 +687,7 @@ function App2(props) {
 		const index = newActivity.connections.length + newActivity.contacts.length;
 		const id_contact_temp = `${activity.id_activity_temp}-${connection_record_type}-${index}`;
 		const newContact = {
-			id_agent: activity.id_agent || id_agent,
+			id_agent,
 			id_contact: 0,
 			id_who_introduced: null,
 			id_who_introduced_temp: null,
@@ -739,7 +727,7 @@ function App2(props) {
 		const index = newActivity.deals.length;
 
 		const newDeal = {
-			id_agent: activity.id_agent || id_agent,
+			id_agent,
 			id_deal: 0,
 			id_activity: activity.id_activity || null,
 			id_activity_temp: `${activity.id_activity_temp}-X`,
@@ -803,6 +791,7 @@ function App2(props) {
 	};
 
 	const saveActivity = () => {
+		setIsLoading(true);
 		const init = {
 			method: 'PUT',
 			headers: {
@@ -811,13 +800,13 @@ function App2(props) {
 			},
 			body: JSON.stringify(activity),
 		};
-		setIsLoading(true);
 		fetch(`${REACT_APP_API_URL}api/activities/`, init)
 			.then(res=>{
 				return res.json();
 			})
 			.then(r=>{
 				setActivity(r);
+				console.log(r)
 				setIsLoading(false);
 			})
 			.catch(err=>{
@@ -828,7 +817,6 @@ function App2(props) {
 	// @@@@@@@@@@@@@@@@@ CONTACTS @@@@@@@@@@@@@@@@@@@@
 
 	const listContacts = limitToVPs => {
-		console.log('listContacts');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -858,7 +846,6 @@ function App2(props) {
 	};
 
 	const openContact = id_contact => {
-		console.log('open contact');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -880,7 +867,6 @@ function App2(props) {
 	};
 
 	const saveContact = () => {
-		console.log('save contact');
 		const init = {
 			method: 'PUT',
 			headers: {
@@ -889,7 +875,6 @@ function App2(props) {
 			},
 			body: JSON.stringify(contact),
 		};
-		console.log(init)
 		setIsLoading(true);
 		fetch(`${REACT_APP_API_URL}api/contacts`, init)
 			.then(res=>{
@@ -906,8 +891,6 @@ function App2(props) {
 
 	const handleContactChange = (k, v) => {
 		const valueFormatted = correctInputType(v, k, inputFormatOptions);
-		console.log({k,v, valueFormatted});
-
 		const newC = JSON.parse(JSON.stringify(contact));
 		newC[k] = valueFormatted;
 		
@@ -917,7 +900,6 @@ function App2(props) {
 	// @@@@@@@@@@@@@@@@@ DEALS @@@@@@@@@@@@@@@@@@@@
 
 	const listDeals = () => {
-		console.log('listDeals');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -947,7 +929,6 @@ function App2(props) {
 	};
 
 	const openDeal = id_deal => {
-		console.log('open deal');
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -969,7 +950,6 @@ function App2(props) {
 	};
 
 	const saveDeal = () => {
-		console.log('save deal');
 		const init = {
 			method: 'PUT',
 			headers: {
@@ -994,8 +974,6 @@ function App2(props) {
 
 	const handleDealChange= (k, v) => {
 		const valueFormatted = correctInputType(v, k, inputFormatOptions);
-		console.log({k,v, valueFormatted});
-
 		const dateFields = {
 			date_deal_year: true,
 			date_deal_month: true,
@@ -1045,7 +1023,6 @@ function App2(props) {
 				return res.json();
 			})
 			.then(r=>{
-				console.log()
 				setCoreValues(r);
 				setMode('core values');
 				setIsLoading(false);
@@ -1068,7 +1045,10 @@ function App2(props) {
 		return {backgroundColor:'#004B6E',color:'#C5E2F6'};
 	};
 
-	const formatStyle = value => {
+	const formatStyle = (value, zeroOk) => {
+		if(value === 0 && zeroOk){
+			return {backgroundColor:'#E6F2FF',color:'#004B6E'};
+		}
 		if(!value){
 			return {backgroundColor:'#004B6E',color:'#C5E2F6'};
 		}

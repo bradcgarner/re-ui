@@ -18,29 +18,26 @@ export default function Proformae(props) {
 
 
 	// convertTimestampToString(d, 'dow d M y')
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	return <div className='display-group'>
 
 		<h2 className='page-header'>MY PROFORMAE</h2>
 
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
-
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-				<p className='major-button-text'>
-					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-				</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-				<p className='major-button-text'>
-					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-				</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
+			<p className='major-button-text'>
+				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
+			</p>
+		</div>
+		<p>&nbsp;</p>
+		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
+			<p className='major-button-text'>
+				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
+			</p>
 		</div>
 
 		<Instructions show={showInstructions}
@@ -48,6 +45,8 @@ export default function Proformae(props) {
 
 
 		<div className='display-group'>
+
+		<h3 className='group-header'>REVENUE</h3>
 
 			<label className='edit-label'>
 				Average Sale Price
@@ -102,6 +101,8 @@ export default function Proformae(props) {
 				
 		<div className='display-group'>
 
+		<h3 className='group-header'>COSTS</h3>
+
 			<label className='edit-label'>
 				Annual Fees (Broker, Association, Etc.)
 				<input className='edit-input edit-input-wide-nest'
@@ -147,6 +148,13 @@ export default function Proformae(props) {
 					style={formatStyle(proformae.pf_cost_year)}
 					onChange={e=>handleProformaeChange('pf_cost_year', e.target.value)}/>
 			</label>
+		</div>
+
+		<div className='divider'/>
+				
+		<div className='display-group'>
+
+		<h3 className='group-header'>PROFIT</h3>
 
 			<label className='edit-label'>
 				Annual Profit
@@ -191,6 +199,8 @@ export default function Proformae(props) {
 
 		<div className='divider'/>
 				
+		<h3 className='group-header'>VOLUME</h3>
+
 		<div className='display-group'>
 			<label className='edit-label'>
 				Units Per Year (repeat)
@@ -244,6 +254,8 @@ export default function Proformae(props) {
 		<div className='divider'/>
 				
 		<div className='display-group'>
+
+			<h3 className='group-header'>ACTIVITIES</h3>
 
 			<label className='edit-label'>
 				Conversations Per Deal (enter)
@@ -354,16 +366,11 @@ export default function Proformae(props) {
 
 		</div>
 
-		<div className='display-group'>
-			<div onClick={()=>saveProformae()} className='major-button'>
-				<p className='major-button-text'>SAVE</p>
-			</div>
+		<div onClick={()=>saveProformae()} className='major-button'>
+			<p className='major-button-text'>SAVE</p>
 		</div>
-
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
 		</div>
 
 	</div>

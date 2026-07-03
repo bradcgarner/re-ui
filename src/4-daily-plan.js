@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { precisionRound,
   convertTimestampToString } from 'conjunction-junction';
 import Instructions from './999-instructions';
+import { isPrimitiveNumber } from 'conjunction-junction/build/basic';
 
 export default function DailyPlan(props) {
 
@@ -21,8 +22,8 @@ export default function DailyPlan(props) {
 	const dateDailyPlan = dailyPlan.date_dp || {};
 
 	// convertTimestampToString(d, 'dow d M y')
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 
 	const quickStats = {
@@ -53,25 +54,22 @@ export default function DailyPlan(props) {
 
 		<h2 className='page-header'>DAILY PLAN</h2>
 
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
-			<div onClick={()=>listDailyPlans()} className="major-button">
-				<p className="major-button-text">Back to List Daily Plans</p>
-			</div>
-
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-				<p className='major-button-text'>
-					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-				</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-				<p className='major-button-text'>
-					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-				</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		<div onClick={()=>listDailyPlans()} className="major-button">
+			<p className="major-button-text">Back to List Daily Plans</p>
+		</div>
+		<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
+			<p className='major-button-text'>
+				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
+			</p>
+		</div>
+		<p>&nbsp;</p>
+		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
+			<p className='major-button-text'>
+				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
+			</p>
 		</div>
 
 		<Instructions show={showInstructions}
@@ -84,8 +82,8 @@ export default function DailyPlan(props) {
 			<div className='date-container'>	
 				<label className='edit-label'>
 					<select className='edit-input edit-input-date'
-						value={dateDailyPlan.date_dp_month || ''}
-						style={formatStyle(dateDailyPlan.date_dp_month)}
+						value={isPrimitiveNumber(dateDailyPlan.date_dp_month) ? dateDailyPlan.date_dp_month : ''}
+						style={formatStyle(dateDailyPlan.date_dp_month, true)}
 						onChange={e=>handleDailyPlanChange('date_dp_month', e.target.value)}>
 							{optionsHash.months}
 					</select>
@@ -381,16 +379,11 @@ export default function DailyPlan(props) {
 
 		<div className='divider'/>
 				
-		<div className='display-group'>
-			<div onClick={()=>saveDailyPlan()} className='major-button'>
-				<p className='major-button-text'>SAVE</p>
-			</div>
+		<div onClick={()=>saveDailyPlan()} className='major-button'>
+			<p className='major-button-text'>SAVE</p>
 		</div>
-
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
 		</div>
 
 		<style>{`

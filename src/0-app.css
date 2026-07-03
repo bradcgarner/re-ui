@@ -102,8 +102,39 @@ select {
 	align-items: center;
 }
 
+.page-top {
+	height: 35vh;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+.main-h1 {
+	font-size: 80px;
+	text-align: center;
+	line-height: 150%;
+	letter-spacing: 7px;
+  background-image: linear-gradient(to right, #83C2E4, #8083C0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+.page-header {
+	width: 100%;
+	font-size: 30px;
+	text-align: center;
+	letter-spacing: 5px;
+  background-image: linear-gradient(to left, #83C2E4, #8083C0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+	margin-top: 5px;
+	margin-bottom: 15px;
+}
+
 .loader-background {
-	position: absolute;
+	position: fixed;
 	height: 100vh;
 	width: 100vw;
 	top: 0;
@@ -189,20 +220,23 @@ select {
 	padding: 5vw;
 }
 
-.page-header {
-	width: 100%;
-	text-align: center;
-	font-size: 24px;
-	margin-top: 15px;
-	letter-spacing: 5px;
-  font-size: 30px;
-}
 .group-header {
 	width: 100%;
 	text-align: center;
 	font-size: 18px;
 	margin-top: 15px;
+	margin-bottom: 7px;
 	color: #0083C0;
+}
+.about-p {
+	margin-bottom: 10px;
+	text-align: center;
+}
+.about-li {
+	list-style:square;
+	margin-left: 15px;
+	font-size:smaller;
+	margin-bottom: 10px;
 }
 
 .divider {
@@ -223,7 +257,6 @@ select {
 	flex-direction: column;
 	padding: 15px;
 	width: 100%;
-	/* max-width: 430px; */
 	margin-top:2vh;
 	margin-bottom: 1vh;
 	justify-content: center;
@@ -232,12 +265,43 @@ select {
 .display-multi-group {
 	border: 1px solid #C5E2F6;
 	border-radius: 10px;
+	padding: 10px;
+}
+.deal-group {
+	background-color: #CEE5F4;
+}
+.fu-group {
+	background-color: #F4F0EB;
+}
+.contact-group {
+	background-color: #E1EAEF;
+}
+.small-group {
+	flex-direction: column;
+	padding: 5px;
+	width: 100%;
+	margin-top:5px;
+	margin-bottom: 5px;
+	justify-content: center;
+	align-items: center;
 }
 .edit-label {
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 10px;
 	width: 400px;
+	font-size: 13px;
+	color: #63B3DB;
+}
+.display-multi-group .edit-label {
+	width: 390px;
+}
+.date-container .edit-label {
+	width: 130px;
+}
+.date-container .edit-label select,
+.date-container .edit-label input {
+	width: 123px;
 }
 .edit-input {
 	font-size: 16px;
@@ -250,10 +314,10 @@ select {
 	width: 100px;
 }
 .edit-input-wide {
-	max-width: 400px;
+	/* max-width: 400px; */
 }
 .edit-input-wide-nest {
-	max-width: 400px;
+	/* max-width: 400px; */
 }
 .edit-textarea {
 	min-height: 100px;
@@ -266,13 +330,22 @@ select {
 	color: #0083C0;
 }
 
+.main-menu-button {
+	width: 100%;
+	max-width: 430px;
+	height: 50px;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 10px;
+}
 .major-button {
 	width: 100%;
 	max-width: 430px;
 	height: 50px;
 	align-items: center;
 	justify-content: center;
-	background-color: #0083C0;
+	background-color: transparent;
+	background-image: linear-gradient(to right, #83C2E4, #8083C0);
 	margin-bottom: 10px;
 }
 .major-button:hover {
@@ -289,7 +362,8 @@ select {
 	height: 30px;
 	align-items: center;
 	justify-content: center;
-	background-color: #A4D2ED;
+	background-color: transparent;
+	background-image: linear-gradient(to right, #2193C9, #83C2E4);
 }
 .minor-button:hover {
 	opacity: 0.75;
@@ -297,6 +371,7 @@ select {
 .minor-button-text {
 	text-align: center;
 	font-weight: bold;
+	color: white;
 }
 .small-button {
 	width: 100%;
@@ -304,7 +379,8 @@ select {
 	height: 20px;
 	align-items: center;
 	justify-content: center;
-	background-color: #A4D2ED;
+	background-color: transparent;
+	background-image: linear-gradient(to right, #2193C9, #83C2E4);
 }
 .small-button:hover {
 	opacity: 0.75;
@@ -317,7 +393,7 @@ select {
 .date-container {
 	flex-direction: row;
 	justify-content: space-between;
-	width: 400px;
+	width: 390px;
 }
 .table-list-thr {
 

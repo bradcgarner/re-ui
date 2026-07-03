@@ -25,8 +25,8 @@ export default function Contact(props) {
 		mode,
 	} = props;
 
-	const [showInstructions, setShowInstructions] = useState(true);
-	const [showDevNotes, setShowDevNotes] = useState(true);
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	const c = contact;
 	const activities = Array.isArray(c.activities) ? c.activities : [];
@@ -36,31 +36,28 @@ export default function Contact(props) {
 
 		<h2 className='page-header'>CONTACT</h2>
 
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		</div>
+		{
+			modePrior === 'vps' ? 
+			<div onClick={()=>listContacts(true)} className="major-button">
+				<p className="major-button-text">Back to List VPs</p>
+			</div> :
+			<div onClick={()=>listContacts()} className="major-button">
+				<p className="major-button-text">Back to List Contacts</p>
 			</div>
-			{
-				modePrior === 'vps' ? 
-				<div onClick={()=>listContacts(true)} className="major-button">
-					<p className="major-button-text">Back to List VPs</p>
-				</div> :
-				<div onClick={()=>listContacts()} className="major-button">
-					<p className="major-button-text">Back to List Contacts</p>
-				</div>
-			}
-
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-				<p className='small-button-text'>
-					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-				</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-				<p className='small-button-text'>
-					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-				</p>
-			</div>
+		}
+		<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
+			<p className='small-button-text'>
+				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
+			</p>
+		</div>
+		<p>&nbsp;</p>
+		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
+			<p className='small-button-text'>
+				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
+			</p>
 		</div>
 
 		<Instructions show={showInstructions}
@@ -211,8 +208,8 @@ export default function Contact(props) {
 			<div className='date-container'>	
 				<label className='edit-label'>
 					<select className='edit-input edit-input-date'
-						value={c.contact_birth_month || ''}
-						style={formatStyle(c.contact_birth_month)}
+						value={isPrimitiveNumber(c.contact_birth_month) ? c.contact_birth_month : ''}
+						style={formatStyle(c.contact_birth_month, true)}
 						onChange={e=>handleContactChange('contact_birth_month', e.target.value)}>
 							{optionsHash.months}
 					</select>
@@ -250,7 +247,7 @@ export default function Contact(props) {
 				const gciToPrint = isPrimitiveNumber(d.deal_gci) ? `$${numberWithCommas(d.deal_gci)}`: '';
 				const dateString = convertTimestampToString(d.date_deal_timestamp, 'dow d M y');
 				
-				return <div key={i} className='display-group display-multi-group'>
+				return <div key={i} className='display-group display-multi-group deal-group'>
 
 					<label className='edit-label'>
 						Deal Name
@@ -371,7 +368,7 @@ export default function Contact(props) {
 			activities.map((a,i)=>{
 				const dateString = convertTimestampToString(a.date_convo_timestamp, 'dow d M y');
 
-				return <div className='display-group display-multi-group'>
+				return <div className='display-group display-multi-group fu-group'>
 					<label className='edit-label'>
 						<input className='edit-input edit-input-wide-nest'
 							style={formatStyle(dateString)}
@@ -408,19 +405,22 @@ export default function Contact(props) {
 			})
 		}
 
-				<div className='divider'/>
+		<div className='divider'/>
 				
-		<div className='display-group'>
-			<div onClick={()=>saveContact()} className='major-button'>
-				<p className='major-button-text'>SAVE</p>
-			</div>
+		<div onClick={()=>saveContact()} className='major-button'>
+			<p className='major-button-text'>SAVE</p>
 		</div>
-
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
 		</div>
-
+		{
+			modePrior === 'vps' ? 
+			<div onClick={()=>listContacts(true)} className="major-button">
+				<p className="major-button-text">Back to List VPs</p>
+			</div> :
+			<div onClick={()=>listContacts()} className="major-button">
+				<p className="major-button-text">Back to List Contacts</p>
+			</div>
+		}
 	</div>
 }

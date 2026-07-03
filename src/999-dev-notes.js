@@ -5,9 +5,16 @@ export default function DevNotes(props) {
 	} = props;
 
 	return show ? 
-		<div className='display-group'>
-			<p className='dev-notes'>
-				{text}
-			</p> 
+		<div className='small-group' style={{alignItems:'flex-start'}}>
+			{
+				Array.isArray(text) ?
+				text.map((t,i)=>{
+					return <p key={i} className="dev-notes">{t}</p>
+				}) :
+				<p className='dev-notes'>
+					{text}
+				</p> 
+				}
+
 		</div> : null 
 }

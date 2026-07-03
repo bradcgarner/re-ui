@@ -48,10 +48,8 @@ export default function TableList(props) {
 
 		<h2 className='page-header'>{header}</h2>
 
-		<div className='display-group'>
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
-			</div>
+		<div onClick={()=>goToMainMenu()} className='major-button'>
+			<p className='major-button-text'>BACK TO MAIN MENU</p>
 		</div>
 
 		<table>
