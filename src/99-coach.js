@@ -13,10 +13,12 @@ export default function Coach(props) {
 	const [showDevNotes, setShowDevNotes] = useState(false);
 
 	const c = content || {};
+	const coachName = c.coachName || 'COACH';
 	const header = c.header || 'COACHING';
 
 	return <div className='display-group'>
 
+		<h2 className='page-header'>{coachName}</h2>
 		<h2 className='page-header'>{header}</h2>
 
 		<div onClick={()=>goToMainMenu()} className='major-button'>

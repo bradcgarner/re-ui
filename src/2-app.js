@@ -82,10 +82,9 @@ function App2(props) {
 
 	const [proformae, setProformae] = useState({});
 
-	const [whatToSay, setWhatToSay] = useState([]);
-	const [smartSales, setSmartSales] = useState([]);
 	const [coreValues, setCoreValues] = useState([]);
 	
+
 	// @@@@@@@@@@@@@@@@@ GENERAL @@@@@@@@@@@@@@@@@@@@
 
 	const goToMainMenu = () => {
@@ -118,7 +117,6 @@ function App2(props) {
 	};
 
 	const handleProformaeChange = (k, v) => {
-		const valueFormatted = correctInputType(v, k, inputFormatOptions);
 
 		const pfFields = {
 			pf_sale_price: true,
@@ -845,6 +843,10 @@ function App2(props) {
 				});
 	};
 
+	const listVPCategories = () => {
+		setMode('vp-categories');
+	};
+
 	const openContact = id_contact => {
 		setIsLoading(true);
 		const init = {
@@ -1018,7 +1020,7 @@ function App2(props) {
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/general/core-values`, init)
+		fetch(`${REACT_APP_API_URL}api/general/core-values/${id_agent}`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1060,10 +1062,9 @@ function App2(props) {
 
 	useEffect(()=>{
 		if(!hasLoaded){
-			openProformae();
 			setHasLoaded(true);
 		}
-	});
+	}, [hasLoaded]);
 
 	// @@@@@@@@@@@ RENDER @@@@@@@@@@@
 
@@ -1076,6 +1077,7 @@ function App2(props) {
 			listActivities={listActivities}
 			listFus={listFus}
 			listContacts={listContacts}
+			listVPCategories={listVPCategories}
 			listDeals={listDeals}
 			openProformae={openProformae}
 			openMetrics={openMetrics}
@@ -1192,6 +1194,20 @@ function App2(props) {
 			items={contacts}
 			theFields={theFields.contacts}
 		/> :
+		mode === 'vp-categories' ?
+		<TableList 
+			screenType={screenType}
+			goToMainMenu={goToMainMenu}
+			formatPresetStyle={formatPresetStyle}
+			formatStyle={formatStyle}
+			valueListsHash={valueListsHash}
+			mode={mode}
+			openItem={openContact}
+			openKey={'id_contact'}
+			header='VENDOR PARTNER CATEGORIES'
+			items={contacts}
+			theFields={theFields.contacts}
+		/> :
 		mode === 'contact' ?
 		<Contact
 			goToMainMenu={goToMainMenu}
@@ -1239,6 +1255,7 @@ function App2(props) {
 		mode === 'deal' ?
 		<Deal
 			goToMainMenu={goToMainMenu}
+			handleDealChange={handleDealChange}
 			listDeals={listDeals}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
@@ -1267,6 +1284,7 @@ function App2(props) {
 		<Metrics
 			goToMainMenu={goToMainMenu}
 		/> :
+		mode === 'models' ||
 		mode === 'what-to-say' ||
 		mode === 'smart-sales' ||
 		mode === 'reverse-sales' ||

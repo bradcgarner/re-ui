@@ -7,7 +7,7 @@ export default function Landing(props) {
 		listActivities,
 		listFus,
 		listContacts,
-		listVPs,
+		listVPCategories,
 		listDeals,
 		openProformae,
 		openMetrics,
@@ -51,42 +51,45 @@ export default function Landing(props) {
 			<p className="major-button-text">Contacts</p>
 		</div>
 		<div onClick={()=>listContacts(true)} className="main-menu-button" style={{backgroundColor: colors[6]}}>
-			<p className="major-button-text">Vendor Partners</p>
+			<p className="major-button-text">Vendor Partners Enrolled</p>
 		</div>
-		<div onClick={()=>listDeals()} className="main-menu-button" style={{backgroundColor: colors[5]}}>
+		<div onClick={()=>listVPCategories()} className="main-menu-button" style={{backgroundColor: colors[5]}}>
+			<p className="major-button-text">Vendor Partner Categories</p>
+		</div>
+		<div onClick={()=>listDeals()} className="main-menu-button" style={{backgroundColor: colors[4]}}>
 			<p className="major-button-text">Deals</p>
 		</div>
 		
 		<div className="divider" style={{marginBottom:35}}/>
 		
-		<div onClick={()=>openProformae(true)} className="main-menu-button" style={{backgroundColor: colors[4]}}>
+		<div onClick={()=>openProformae(true)} className="main-menu-button" style={{backgroundColor: colors[3]}}>
 			<p className="major-button-text">Proformae</p>
 		</div>		
-		<div onClick={()=>openMetrics()} className="main-menu-button" style={{backgroundColor: colors[3]}}>
+		<div onClick={()=>openMetrics()} className="main-menu-button" style={{backgroundColor: colors[2]}}>
 			<p className="major-button-text">Metrics</p>
 		</div>
 
 		<div className="divider" style={{marginBottom:35}}/>
 		
-		<div onClick={()=>openCoach('models')} className="main-menu-button" style={{backgroundColor: colors[2]}}>
+		<div onClick={()=>openCoach('models')} className="main-menu-button" style={{backgroundColor: colors[1]}}>
 			<p className="major-button-text">Danielle Mapes</p>
 		</div>
-		<div onClick={()=>openCoach('what-to-say')} className="main-menu-button" style={{backgroundColor: colors[1]}}>
+		<div onClick={()=>openCoach('what-to-say')} className="main-menu-button" style={{backgroundColor: colors[0]}}>
 			<p className="major-button-text">Mie Yamashita</p>
 		</div>
-		<div onClick={()=>openCoach('pitch')} className="main-menu-button" style={{backgroundColor: colors[0]}}>
+		<div onClick={()=>openCoach('pitch')} className="main-menu-button" style={{backgroundColor: colors[1]}}>
 			<p className="major-button-text">Forbes Riley</p>
 		</div>
-		<div onClick={()=>openCoach('smart-sales')} className="main-menu-button" style={{backgroundColor: colors[1]}}>
+		<div onClick={()=>openCoach('smart-sales')} className="main-menu-button" style={{backgroundColor: colors[2]}}>
 			<p className="major-button-text">Dale Archdekin</p>
 		</div>
-		<div onClick={()=>openCoach('reverse-sales')} className="main-menu-button" style={{backgroundColor: colors[2]}}>
+		<div onClick={()=>openCoach('reverse-sales')} className="main-menu-button" style={{backgroundColor: colors[3]}}>
 			<p className="major-button-text">Brendan Mulrenin</p>
 		</div>
 
 		<div className="divider" style={{marginBottom:35}}/>
 
-		<div onClick={()=>openCoreValues()} className="main-menu-button" style={{backgroundColor: colors[3]}}>
+		<div onClick={()=>openCoreValues()} className="main-menu-button" style={{backgroundColor: colors[4]}}>
 			<p className="major-button-text">Core Values</p>
 		</div>
 	</div>
