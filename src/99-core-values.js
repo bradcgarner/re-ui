@@ -1,4 +1,3 @@
-import { convertTimestampToString } from 'conjunction-junction/build/date-time';
 import { useState } from 'react';
 import Instructions from './999-instructions';
 
@@ -17,7 +16,7 @@ export default function CoreValues(props) {
 
 	return <div className='display-group'>
 
-		<h2 className='page-header'>CORE VALUES</h2>
+		<h2 className='page-header'>{header}</h2>
 
 		<div onClick={()=>goToMainMenu()} className='major-button'>
 			<p className='major-button-text'>BACK TO MAIN MENU</p>

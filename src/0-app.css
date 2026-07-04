@@ -81,7 +81,6 @@ h2 {
 
 table {
 	margin-bottom: 10px;
-	margin-top: 10px;
 	border-spacing: 0;
 	border-collapse: collapse;
 	background-color: white;
@@ -129,7 +128,6 @@ select {
   -webkit-background-clip: text;
   color: transparent;
   display: inline-block;
-	margin-top: 5px;
 	margin-bottom: 15px;
 }
 
@@ -154,7 +152,7 @@ select {
 
 .loader {
   --R: 150px;
-  --g1: #63B3DB 96%, #0000;
+  --g1: #0083C0 96%, #0000;
   --g2: #eeeeee 96%, #0000;
   width: calc(2*var(--R));
   aspect-ratio: 1;
@@ -201,13 +199,13 @@ select {
 	font-style: italic;
 	color: #0083C0;
 	font-size: 12px;
-	margin-top: 5px;
+	margin-bottom: 5px;
 }
 .dev-notes {
 	font-style: italic;
 	color: #ccc;
 	font-size: 12px;
-	margin-top: 5px;
+	margin-bottom: 5px;
 }
 .column {
 	flex-direction: column;
@@ -224,7 +222,6 @@ select {
 	width: 100%;
 	text-align: center;
 	font-size: 18px;
-	margin-top: 15px;
 	margin-bottom: 7px;
 	color: #0083C0;
 }
@@ -241,7 +238,7 @@ select {
 
 .divider {
 	width: 100%;
-	height: 30px;
+	height: 20px;
 	margin-bottom: 20px;
 	border-bottom: 5px solid #0083C0;
 }
@@ -257,7 +254,6 @@ select {
 	flex-direction: column;
 	padding: 15px;
 	width: 100%;
-	margin-top:2vh;
 	margin-bottom: 1vh;
 	justify-content: center;
 	align-items: center;
@@ -268,19 +264,18 @@ select {
 	padding: 10px;
 }
 .deal-group {
-	background-color: #CEE5F4;
+	background-color: #e4f2fb;
 }
 .fu-group {
-	background-color: #F4F0EB;
+	background-color: #f9f7f6;
 }
 .contact-group {
-	background-color: #E1EAEF;
+	background-color: #f4f4f4;
 }
 .small-group {
 	flex-direction: column;
 	padding: 5px;
 	width: 100%;
-	margin-top:5px;
 	margin-bottom: 5px;
 	justify-content: center;
 	align-items: center;
@@ -288,7 +283,7 @@ select {
 .edit-label {
 	display: flex;
 	flex-direction: column;
-	margin-bottom: 10px;
+	margin-bottom: 7px;
 	width: 400px;
 	font-size: 13px;
 	color: #63B3DB;
@@ -318,6 +313,17 @@ select {
 }
 .edit-input-wide-nest {
 	/* max-width: 400px; */
+}
+.edit-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.edit-row .edit-input-wide-nest {
+	width: 330px;
+}
+.edit-row .edit-input-tiny {
+	width: 40px;
 }
 .edit-textarea {
 	min-height: 100px;
@@ -393,7 +399,11 @@ select {
 .date-container {
 	flex-direction: row;
 	justify-content: space-between;
+	width: 400px;
+}
+.display-multi-group .date-container {
 	width: 390px;
+
 }
 .table-list-thr {
 

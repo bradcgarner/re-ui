@@ -14,7 +14,7 @@ export default function Deal(props) {
 		handleDealChange,
 		listDeals,
 		deal,
-		valueListsHash,
+		// valueListsHash,
 		formatPresetStyle,
 		formatStyle,
 		saveDeal,
@@ -36,14 +36,14 @@ export default function Deal(props) {
 	const valueToPrint = isPrimitiveNumber(d.deal_value) ? `$${numberWithCommas(d.deal_value)}`: '';
 	const gciToPrint = isPrimitiveNumber(d.deal_gci) ? `$${numberWithCommas(d.deal_gci)}`: '';
 			
-	const printDate = d => {
-		return convertTimestampToString(d, 'dow d M y')
-	};
-	const getValueListValue = v => {
-		const vl = valueListsHash[`${v}`] || {};
-		console.log({v,vl})
-		return vl.label || v;
-	};
+	// const printDate = d => {
+	// 	return convertTimestampToString(d, 'dow d M y')
+	// };
+	// const getValueListValue = v => {
+	// 	const vl = valueListsHash[`${v}`] || {};
+	// 	console.log({v,vl})
+	// 	return vl.label || v;
+	// };
 
 	return <div className='display-group'>
 

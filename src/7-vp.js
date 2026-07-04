@@ -1,4 +1,4 @@
-import { convertTimestampToString } from 'conjunction-junction';
+// import { convertTimestampToString } from 'conjunction-junction';
 import { useState } from 'react';
 import Instructions from './999-instructions';
 
@@ -7,25 +7,25 @@ export default function VendorPartner(props) {
 	const {
 		goToMainMenu,
 		listContacts,
-		contact,
-		valueListsHash,
-		formatPresetStyle,
-		formatStyle,
+		// contact,
+		// valueListsHash,
+		// formatPresetStyle,
+		// formatStyle,
 		saveContact,
-		optionsHash,
+		// optionsHash,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);
 	const [showDevNotes, setShowDevNotes] = useState(false);
 
-	const printDate = d => {
-		return convertTimestampToString(d, 'dow d M y')
-	};
-	const getValueListValue = v => {
-		const vl = valueListsHash[`${v}`] || {};
-		console.log({v,vl})
-		return vl.label || v;
-	};
+	// const printDate = d => {
+	// 	return convertTimestampToString(d, 'dow d M y')
+	// };
+	// const getValueListValue = v => {
+	// 	const vl = valueListsHash[`${v}`] || {};
+	// 	console.log({v,vl})
+	// 	return vl.label || v;
+	// };
 
 	return <div className='display-group'>
 

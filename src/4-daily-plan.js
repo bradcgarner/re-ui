@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { precisionRound,
-  convertTimestampToString } from 'conjunction-junction';
+  // convertTimestampToString,
+isPrimitiveNumber } from 'conjunction-junction';
 import Instructions from './999-instructions';
-import { isPrimitiveNumber } from 'conjunction-junction/build/basic';
 
 export default function DailyPlan(props) {
 
 	const {
 		goToMainMenu,
 		listDailyPlans,
-		valueListsHash,
+		// valueListsHash,
 		dailyPlan,
 		formatPresetStyle,
 		formatStyle,

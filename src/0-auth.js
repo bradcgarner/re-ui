@@ -104,7 +104,7 @@ useEffect(()=> {
 				console.error(err);
 			});
 		}
-	});
+	}, [hasLoaded, agent]);
 
 	const loading = isLoading ? <Loading/> : null
 

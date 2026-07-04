@@ -8,7 +8,6 @@ import Reminder from './999-reminder';
 
 export default function Activity(props) {
 
-	const x = 1; // testing 
 	const {
 		listActivities,
 		listFus,
@@ -21,7 +20,7 @@ export default function Activity(props) {
 		activity,
 		optionsHash,
 		dealStatusHash,
-		valueListsHash, 
+		// valueListsHash, 
 		referralHash,
 		vpReferenceHash,
 		vpStatusHash,
@@ -64,7 +63,19 @@ export default function Activity(props) {
 				return c.contact_name_first || '?';
 			}).join(' & ') : '??';
 		return theNames;
-	}
+	};
+
+	const contactOptions = !activity.contactFilter ? optionsHash.contact :
+		Array.isArray(optionsHash.contact) && typeof activity.contactFilter === 'string' ? 
+		optionsHash.contact.filter((o,i)=>{
+			if(i===0){return true;}
+			if(o.props && 
+				typeof o.props.children === 'string' && 
+				o.props.children[0] === activity.contactFilter.toUpperCase()){
+				return true;
+			}
+			return false;
+		}) : optionsHash.contact;
 
 	return <div className='display-group'>
 
@@ -103,35 +114,33 @@ export default function Activity(props) {
 
 		<h3 className='group-header'>DATE</h3>
 		
-		<div className='display-group'>
-			<p>{date_convo.dateString}</p>
-			<div className='date-container'>	
-				<label className='edit-label'>
-					<select className='edit-input edit-input-date'
-						value={isPrimitiveNumber(date_convo.date_convo_month) ? date_convo.date_convo_month : ''}
-						style={formatStyle(date_convo.date_convo_month, true)}
-						onChange={e=>handleActivityChange('date_convo',null,'date_convo_month',null, e.target.value)}>
-							{optionsHash.months}
-					</select>
-					Month
-				</label>
-				<label className='edit-label'>
-					<input className='edit-input edit-input-date'
-						type='number'
-						value={date_convo.date_convo_day || ''}
-						style={formatStyle(date_convo.date_convo_day)}
-						onChange={e=>handleActivityChange('date_convo',null,'date_convo_day',null, e.target.value)}/>
-					Day
-				</label>
-				<label className='edit-label'>
-					<input className='edit-input edit-input-date'
-						type='number'
-						value={date_convo.date_convo_year || ''}
-						style={formatStyle(date_convo.date_convo_year)}
-						onChange={e=>handleActivityChange('date_convo',null,'date_convo_year',null, e.target.value)}/>
-					Year
-				</label>
-			</div>
+		<p>{date_convo.dateString}</p>
+		<div className='date-container'>	
+			<label className='edit-label'>
+				<select className='edit-input edit-input-date'
+					value={isPrimitiveNumber(date_convo.date_convo_month) ? date_convo.date_convo_month : ''}
+					style={formatStyle(date_convo.date_convo_month, true)}
+					onChange={e=>handleActivityChange('date_convo',null,'date_convo_month',null, e.target.value)}>
+						{optionsHash.months}
+				</select>
+				Month
+			</label>
+			<label className='edit-label'>
+				<input className='edit-input edit-input-date'
+					type='number'
+					value={date_convo.date_convo_day || ''}
+					style={formatStyle(date_convo.date_convo_day)}
+					onChange={e=>handleActivityChange('date_convo',null,'date_convo_day',null, e.target.value)}/>
+				Day
+			</label>
+			<label className='edit-label'>
+				<input className='edit-input edit-input-date'
+					type='number'
+					value={date_convo.date_convo_year || ''}
+					style={formatStyle(date_convo.date_convo_year)}
+					onChange={e=>handleActivityChange('date_convo',null,'date_convo_year',null, e.target.value)}/>
+				Year
+			</label>
 		</div>
 
 		<Instructions show={showInstructions}
@@ -166,18 +175,20 @@ export default function Activity(props) {
 		{
 			contacts.length > 0 ? contacts.map((c,i)=>{
 				return <div key={i} className='display-group display-multi-group contact-group'>
-					{
-						isPrimitiveNumber(c.id_contact) ?
-							<label className='edit-label'>
-								Select A Contact
-								<select className='edit-input edit-input-wide-nest'
-									value={c.id_contact || ''}
-									style={formatStyle(c.id_contact)}
-									onChange={e=>handleActivityChange('contacts',i,'id_contact',null, e.target.value)}>
-										{optionsHash.contact}
-								</select>
-							</label> : null 
-					}
+					<label className='edit-label'>
+						Select A Contact
+						<div className='edit-row'>
+							<input className='edit-input edit-input-tiny'
+								value={activity.contactFilter || ''}
+								onChange={e=>handleActivityChange('contactFilter',null,null,null, e.target.value)}/>
+							<select className='edit-input edit-input-wide-nest'
+								value={c.id_contact || ''}
+								style={formatStyle(c.id_contact)}
+								onChange={e=>handleActivityChange('contacts',i,'id_contact',null, e.target.value)}>
+									{contactOptions}
+							</select>
+						</div>
+					</label> 
 					<label className='edit-label'>
 						First Name
 						<input className='edit-input edit-input-wide-nest'
@@ -231,14 +242,19 @@ export default function Activity(props) {
 						referralHash[`${c.contact_how_met}`] ?
 							<label className='edit-label'>
 								Who First Introduced Me To {c.contact_name_first || 'Them'}?
-								<select className='edit-input edit-input-wide-nest'
-									value={c.id_who_introduced || ''}
-									style={formatStyle(c.id_who_introduced)}
-									onChange={e=>handleActivityChange('contacts',i, 'id_who_introduced',null, e.target.value)}>
-										{optionsHash.contact}
-								</select>
+								<div className='edit-row'>
+									<input className='edit-input edit-input-tiny'
+										value={activity.contactFilter || ''}
+										onChange={e=>handleActivityChange('contactFilter',null,null,null, e.target.value)}/>
+									<select className='edit-input edit-input-wide-nest'
+										value={c.id_who_introduced || ''}
+										style={formatStyle(c.id_who_introduced)}
+										onChange={e=>handleActivityChange('contacts',i, 'id_who_introduced',null, e.target.value)}>
+											{contactOptions}
+									</select>
+								</div>
 								{
-									Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
+									!c.id_who_introduced && Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
 									<select className='edit-input edit-input-wide-nest'
 										value={c.id_who_introduced_temp || ''}
 										style={formatStyle(c.id_who_introduced_temp)}
@@ -638,18 +654,20 @@ export default function Activity(props) {
 		{
 			connections.length > 0 ? connections.map((c,i)=>{
 				return <div key={i} className='display-group display-multi-group contact-group'>
-					{
-						isPrimitiveNumber(c.id_contact) ?
-							<label className='edit-label'>
-								Select A Contact
-								<select className='edit-input edit-input-wide-nest'
-									value={c.id_contact || ''}
-									style={formatStyle(c.id_contact)}
-									onChange={e=>handleActivityChange('connections',i,'id_contact',null, e.target.value)}>
-										{optionsHash.contact}
-								</select>
-							</label> : null
-					}
+					<label className='edit-label'>
+						Select A Contact
+						<div className='edit-row'>
+							<input className='edit-input edit-input-tiny'
+								value={activity.contactFilter || ''}
+								onChange={e=>handleActivityChange('contactFilter',null,null,null, e.target.value)}/>
+							<select className='edit-input edit-input-wide-nest'
+								value={c.id_contact || ''}
+								style={formatStyle(c.id_contact)}
+								onChange={e=>handleActivityChange('connections',i,'id_contact',null, e.target.value)}>
+									{contactOptions}
+							</select>
+						</div>
+					</label>
 					{
 						Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
 							<select className='edit-input edit-input-wide-nest'
@@ -723,14 +741,19 @@ export default function Activity(props) {
 						referralHash[`${c.contact_how_met}`] ?
 							<label className='edit-label'>
 								{vpReferenceHash[`${c.connection_type}`] ? 'Which VP Sent Me' : 'Who First Introduced Me To'} {c.contact_name_first || 'Them'}?
-								<select className='edit-input edit-input-wide-nest'
-									value={c.id_who_introduced || ''}
-									style={formatPresetStyle(c.id_who_introduced)}
-									onChange={e=>handleActivityChange('connections',i, 'id_who_introduced',null, e.target.value)}>
-										{optionsHash.contact}
-								</select>
+									<div className='edit-row'>
+										<input className='edit-input edit-input-tiny'
+											value={activity.contactFilter || ''}
+											onChange={e=>handleActivityChange('contactFilter',null,null,null, e.target.value)}/>
+										<select className='edit-input edit-input-wide-nest'
+											value={c.id_who_introduced || ''}
+											style={formatPresetStyle(c.id_who_introduced)}
+											onChange={e=>handleActivityChange('connections',i, 'id_who_introduced',null, e.target.value)}>
+												{contactOptions}
+										</select>
+									</div>
 								{
-									Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
+									!c.id_who_introduced && Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
 										<select className='edit-input edit-input-wide-nest'
 											value={c.id_who_introduced_temp || ''}
 											style={formatPresetStyle(c.id_who_introduced_temp)}
@@ -846,14 +869,19 @@ export default function Activity(props) {
 					</div>
 					<label className='edit-label'>
 						Contact To Follow-Up With
-						<select className='edit-input edit-input-wide-nest'
-							value={fu.id_contact_fu || ''}
-							style={formatStyle(fu.id_contact_fu)}
-							onChange={e=>handleActivityChange('fus',i, 'id_contact_fu',null, e.target.value)}>
-								{optionsHash.contact}
-						</select>
+						<div className='edit-row'>
+							<input className='edit-input edit-input-tiny'
+								value={activity.contactFilter || ''}
+								onChange={e=>handleActivityChange('contactFilter',null,null,null, e.target.value)}/>
+							<select className='edit-input edit-input-wide-nest'
+								value={fu.id_contact_fu || ''}
+								style={formatStyle(fu.id_contact_fu)}
+								onChange={e=>handleActivityChange('fus',i, 'id_contact_fu',null, e.target.value)}>
+									{contactOptions}
+							</select>
+						</div>
 						{
-							Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
+							!fu.id_contact_fu && Array.isArray(newContactOptions) && newContactOptions.length > 0 ?
 								<select className='edit-input edit-input-wide-nest'
 									value={fu.id_contact_fu_temp || ''}
 									style={formatStyle(fu.id_contact_fu_temp)}

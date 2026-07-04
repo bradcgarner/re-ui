@@ -966,7 +966,8 @@ function App2(props) {
 				return res.json();
 			})
 			.then(r=>{
-				setProformae(r);
+				console.log(r)
+				setDeal(r);
 				setIsLoading(false);
 			})
 			.catch(err=>{

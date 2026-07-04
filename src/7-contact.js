@@ -17,12 +17,12 @@ export default function Contact(props) {
 		openDeal,
 		openActivity,
 		contact,
-		valueListsHash,
+		// valueListsHash,
 		referralHash,
 		optionsHash,
 		vpStatusHash,
 		modePrior,
-		mode,
+		// mode,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);

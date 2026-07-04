@@ -1,4 +1,4 @@
-import { convertTimestampToString } from 'conjunction-junction';
+// import { convertTimestampToString } from 'conjunction-junction';
 import { useState } from 'react';
 import Instructions from './999-instructions';
 
@@ -6,9 +6,6 @@ export default function Metrics(props) {
 
 	const {
 		goToMainMenu,
-		openActivity,
-		fus,
-		valueListsHash,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);

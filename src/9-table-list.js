@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { convertTimestampToString,
+// import { useState } from 'react';
+import { 
+	convertTimestampToString,
 	numberWithCommas,
-	precisionRound
+	precisionRound,
+	isPrimitiveNumber
  } from 'conjunction-junction';
-import { calcMinimumWindowDimensions, calcScreenType } from 'browser-helpers/build/dimensions';
-import { isPrimitiveNumber } from 'conjunction-junction/build/basic';
+import { calcMinimumWindowDimensions } from 'browser-helpers';
 
 export default function TableList(props) {
 
@@ -20,7 +21,6 @@ export default function TableList(props) {
 		header,
 	} = props;
 
-	const screenType = calcScreenType().type;
 	const dims = calcMinimumWindowDimensions(window);
 	const widthOuter = isPrimitiveNumber(dims.cssWidthOuter) ? dims.cssWidthOuter : 430;
 	const hundreds = precisionRound(widthOuter/100, 0);
@@ -28,7 +28,7 @@ export default function TableList(props) {
 
 	const fields = Array.isArray(theFields) ? theFields.filter((f,i)=>{
 		return i<= max;
-	}) : fields;
+	}) : theFields;
 
 	const printDate = d => {
 		return convertTimestampToString(d, 'dow d M y')

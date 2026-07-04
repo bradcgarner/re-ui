@@ -58,29 +58,37 @@ function App() {
 		'164': 94,
 	};
 	const convoTypeHash = {
-		'28': 166, // lead gen
-		'29': 166,
-		'30': 166,
-		'31': 167, // follow-up
-		'32': 167,
-		'33': 166,
-		'34': 166,
-		'35': 166,
-		'36': 166,
-		'37': 165, // service
-		'38': 166,
+		// lead gen
+		'28': 166, // reverse problem solve
+		'33': 167, // solve their problem
+		'29': 166, // get vp on list
+		'32': 166, // planned RE Convo
+		'38': 166, // unplanned
+		'39': 166, // other
+		
+		// follow-up
+		'31': 167, // vp app follow-up
+		'34': 167, // vp reference check
+		'36': 167, // vp check-in
+		'202': 167, // customer requested to meet
+
+		// service
+		'37': 165, // service call
 	};
 	const convoIntentionalHash = {
-		'52': 168, // intentional
-		'53': 168,
-		'54': 169,
-		'55': 169, // not intentional
-		'56': 169,
-		'57': 169,
-		'58': 169,
+		// intentional
+		'52': 168, // yes, ran model
+		'53': 168, // yes, did not run model
+		// not intentional
+		'57': 169, // no did not run model
+		'54': 169, // n/a vague vm
+		'56': 169, // left vm
+		'55': 169, // not 2-way
+		'58': 169, // did not connect
 	};
 	const problemSolveHash = {
-		'59': true,
+		'59': true, // vp problem
+		'211': true, // re problem
 	};
 	const dateIntegerHash = {
 		'date_convo_year': true,
@@ -241,7 +249,7 @@ function App() {
 			'convo_problem_solve',
 			'convo_deal_found',
 			'convo_outcome',
-			
+
 			'contact_how_met',
 			'contact_where_met',
 			'contact_type',

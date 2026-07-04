@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { precisionRound,
-  convertTimestampToString } from 'conjunction-junction';
+// import { precisionRound,
+//   convertTimestampToString } from 'conjunction-junction';
 import Instructions from './999-instructions';
 
 export default function Proformae(props) {
 
 	const {
 		goToMainMenu,
-		valueListsHash,
+		// valueListsHash,
 		proformae,
-		formatPresetStyle,
+		// formatPresetStyle,
 		formatStyle,
 		handleProformaeChange,
-		optionsHash,
+		// optionsHash,
 		saveProformae,
 	} = props;
 
