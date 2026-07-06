@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2211.6 80.57">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: MyriadPro-Regular, 'Myriad Pro';
+        font-size: 18px;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <line class="cls-2" y1="53.1" x2="2211.6" y2="53.1"/>
+  <rect id="_0" data-name="0" class="cls-2" x="22.61" y="27.29" width="86.31" height="22.13"/>
+  <text class="cls-1" transform="translate(37.61 76.07)"><tspan x="0" y="0">1/2026</tspan></text>
+  <text class="cls-1" transform="translate(37.61 15.07)"><tspan x="0" y="0">1/2026</tspan></text>
+  <rect id="_1" data-name="1" class="cls-2" x="112.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_2" data-name="2" class="cls-2" x="203.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_3" data-name="3" class="cls-2" x="293.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_4" data-name="4" class="cls-2" x="383.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_5" data-name="5" class="cls-2" x="473.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_6" data-name="6" class="cls-2" x="564.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_7" data-name="7" class="cls-2" x="654.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_8" data-name="8" class="cls-2" x="744.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_9" data-name="9" class="cls-2" x="834.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_10" data-name="10" class="cls-2" x="925.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="_11" data-name="11" class="cls-2" x="1015.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Q1" class="cls-2" x="1105.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Q2" class="cls-2" x="1195.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Q3" class="cls-2" x="1286.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Q4" class="cls-2" x="1376.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y3" class="cls-2" x="1467.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y4" class="cls-2" x="1557.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y5" class="cls-2" x="1648.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y6" class="cls-2" x="1738.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y7" class="cls-2" x="1828.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y8" class="cls-2" x="1918.92" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y9" class="cls-2" x="2009.61" y="27.29" width="86.31" height="22.13"/>
+  <rect id="Y10" class="cls-2" x="2099.92" y="27.29" width="86.31" height="22.13"/>
+</svg>

@@ -24,6 +24,7 @@ import Metrics from './8-metrics';
 import Coach from './99-coach';
 import TableList from './9-table-list';
 import CoreValues from './99-core-values';
+import Income from './8-income';
 
 const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
@@ -83,6 +84,8 @@ function App2(props) {
 	const [proformae, setProformae] = useState({});
 
 	const [coreValues, setCoreValues] = useState([]);
+
+	const [incomeData, setIncomeData] = useState({});
 	
 
 	// @@@@@@@@@@@@@@@@@ GENERAL @@@@@@@@@@@@@@@@@@@@
@@ -1005,8 +1008,24 @@ function App2(props) {
 
 	// @@@@@@@@@@@@@@@@@@ METRICS @@@@@@@@@@@@@@@@@@
 
-	const openMetrics = () => {
-		setMode('metrics');
+	const getIncomeGraph = () => {
+		setIsLoading(true);
+		const init = {
+			method: 'GET',
+			headers: {Authorization: `Bearer ${localStorage.authToken}`},
+		};
+		fetch(`${REACT_APP_API_URL}api/deals/income`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setMode('incomeGraph');
+				setIncomeData(r);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
 	};
 
 	// @@@@@@@@@@@@@@@@@ COACHING @@@@@@@@@@@@@@@@@@@@
@@ -1081,7 +1100,7 @@ function App2(props) {
 			listVPCategories={listVPCategories}
 			listDeals={listDeals}
 			openProformae={openProformae}
-			openMetrics={openMetrics}
+			getIncomeGraph={getIncomeGraph}
 			openCoach={openCoach}
 			openCoreValues={openCoreValues}
 		/> :
@@ -1280,6 +1299,11 @@ function App2(props) {
 			handleProformaeChange={handleProformaeChange}
 			optionsHash={optionsHash}
 			saveProformae={saveProformae}
+		/> :
+		mode === 'incomeGraph' ?
+		<Income
+			goToMainMenu={goToMainMenu}
+			incomeData={incomeData}
 		/> :
 		mode === 'metrics' ?
 		<Metrics

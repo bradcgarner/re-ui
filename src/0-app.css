@@ -445,3 +445,9 @@ select {
 	border-radius: 0.2em;
 	background: currentColor;
 }
+
+.graph-container {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+}
