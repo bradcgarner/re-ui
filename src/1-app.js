@@ -159,9 +159,11 @@ function App() {
 	const [contactsHash, setContactsHash] = useState({});
 	const [dealsHash, setDealsHash] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
+	const [proformae, setProformae] = useState({});
 
 	const formatAndSetLists = content => {
 		const {
+			// proformae,
 			valueListHash,
 			fullHash, 
 			contactsHash, 
@@ -178,6 +180,7 @@ function App() {
 				newListsHash[k].push(<option key={thisO.id} value={thisO.id}>{thisO.label}</option>)
 			}
 		}
+		setProformae(content.proformae);
 		setContactsHash(contactsHash);
 		setDealsHash(dealsHash);
 		setValueListsHash(fullHash);
@@ -317,6 +320,7 @@ function App() {
 				dateIntegerHash={dateIntegerHash}
 				contactsHash={contactsHash}
 				dealsHash={dealsHash}
+				proformae={proformae}
 				setIsLoading={setIsLoading}
 			/>
 			{

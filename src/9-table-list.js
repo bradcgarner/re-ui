@@ -15,6 +15,7 @@ export default function TableList(props) {
 		openKey,
 		items,
 		valueListsHash,
+		coreValues,
 		formatPresetStyle,
 		formatStyle,
 		theFields,
@@ -30,12 +31,22 @@ export default function TableList(props) {
 		return i<= max;
 	}) : theFields;
 
+	const coreValuesHash = {};
+	if(Array.isArray(coreValues)){
+		coreValues.forEach(v=>{
+			coreValuesHash[`${v.id_cv}`] = v;
+		})
+	}
 	const printDate = d => {
 		return convertTimestampToString(d, 'dow d M y')
 	};
 	const getValueListValue = v => {
 		const vl = valueListsHash[`${v}`] || {};
 		return vl.label || v;
+	};
+	const getCoreValueListValue = v => {
+		const vl = coreValuesHash[`${v}`] || {};
+		return vl.cv_label || v;
 	};
 	const printDollar = d => {
 		return `$${numberWithCommas(d)}`;
@@ -70,7 +81,13 @@ export default function TableList(props) {
 							{
 								fields.map((f,i)=>{
 									const value = a[f.fieldName];
-									const fd = f.fd === 'vl' ? getValueListValue(value) : f.fd === 'date' ? printDate(value) : f.fd === 'dollar' ? printDollar(value) : f.fd === 'pct' ? printPct(value) : value ;
+									const fd = 
+										f.fd === 'vl' ? getValueListValue(value) : 
+										f.fd === 'date' ? printDate(value) : 
+										f.fd === 'cv' ? getCoreValueListValue(value) : 
+										f.fd === 'dollar' ? printDollar(value) : 
+										f.fd === 'pct' ? printPct(value) : 
+										value ;
 									const fs = f.fd === 'vl' ? formatPresetStyle : formatStyle;
 									return <td key={i} className='table-list-td' style={fs(value)}>{fd}</td>
 								})

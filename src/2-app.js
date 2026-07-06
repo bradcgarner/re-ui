@@ -81,7 +81,7 @@ function App2(props) {
 	const [newDealOptions, setNewDealOptions] = useState([]);
 	const [newContactOptions, setNewContactOptions] = useState([]);
 
-	const [proformae, setProformae] = useState({});
+	const [proformae, setProformae] = useState(props.proformae);
 
 	const [coreValues, setCoreValues] = useState([]);
 
@@ -249,8 +249,10 @@ function App2(props) {
 					return res.json();
 				})
 				.then(r=>{
-					const newDailyPlans = Array.isArray(r) ? r : [];
+					const newDailyPlans = Array.isArray(r.dailyPlans) ? r.dailyPlans : [];
+					const newCoreValues = Array.isArray(r.coreValues) ? r.coreValues : [];
 					setDailyPlans(newDailyPlans);
+					setCoreValues(newCoreValues);
 					setMode('daily-plans');
 					setIsLoading(false);
 				})
@@ -318,7 +320,7 @@ function App2(props) {
 			body: JSON.stringify(dailyPlan),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/daily-plans/`, init)
+		fetch(`${REACT_APP_API_URL}api/daily-plans`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -1124,6 +1126,8 @@ function App2(props) {
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
 			valueListsHash={valueListsHash}
+			coreValues={coreValues}
+			proformae={proformae}
 			mode={mode}
 			openItem={openDailyPlan}
 			openKey={'id_dp'}

@@ -8,7 +8,7 @@ export const theFields = {
 		{
 			fieldName: 'dp_cv_1', 
 			label: 'core value 1', 
-			fd: 'vl'
+			fd: 'cv'
 		},
 		{
 			fieldName: 'dp_cv_1_rank', 
@@ -18,7 +18,7 @@ export const theFields = {
 		{
 			fieldName: 'dp_cv_2', 
 			label: 'core value 2', 
-			fd: 'vl'
+			fd: 'cv'
 		},
 		{
 			fieldName: 'dp_cv_2_rank', 
@@ -28,7 +28,7 @@ export const theFields = {
 		{
 			fieldName: 'dp_cv_3', 
 			label: 'core value 3', 
-			fd: 'vl'
+			fd: 'cv'
 		},
 		{
 			fieldName: 'dp_cv_3_rank', 
