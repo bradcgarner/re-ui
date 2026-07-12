@@ -15,6 +15,7 @@ export default function TableList(props) {
 		openKey,
 		items,
 		valueListsHash,
+		vpAppStatusHash,
 		coreValues,
 		formatPresetStyle,
 		formatStyle,
@@ -22,10 +23,20 @@ export default function TableList(props) {
 		header,
 	} = props;
 
+	const formatVpAppStatusStyle = id => {
+		if(vpAppStatusHash[`${id}`]){
+			const thisItem = vpAppStatusHash[`${id}`];
+			const backgroundColor = thisItem.color || '#cccccc';
+			const color = thisItem.luma <= 170 ? 'white' : '#004B6E';
+			return {backgroundColor, color};
+		}
+		return {backgroundColor:'#004B6E',color:'#C5E2F6'};
+	};
+
 	const dims = calcMinimumWindowDimensions(window);
 	const widthOuter = isPrimitiveNumber(dims.cssWidthOuter) ? dims.cssWidthOuter : 430;
 	const hundreds = precisionRound(widthOuter/100, 0);
-	const max = openKey === 'id_contact' && hundreds <= 5 ? 1 : hundreds <= 5 ? hundreds - 1 : hundreds <= 10 ? hundreds : 50;
+	const max = openKey === 'id_contact' && hundreds <= 5 ? 1 : hundreds <= 5 ? hundreds - 1 : hundreds <= 10 ? hundreds : 20;
 
 	const fields = Array.isArray(theFields) ? theFields.filter((f,i)=>{
 		return i<= max;
@@ -48,6 +59,10 @@ export default function TableList(props) {
 		const vl = coreValuesHash[`${v}`] || {};
 		return vl.cv_label || v;
 	};
+	const getVendorPartnerAppStatus = v => {
+		const vl = vpAppStatusHash[`${v}`] || {};
+		return vl.label || v;
+	};
 	const printDollar = d => {
 		return `$${numberWithCommas(d)}`;
 	};
@@ -55,12 +70,12 @@ export default function TableList(props) {
 		return `${precisionRound(d * 100, 0)}%`;
 	};
 
-	return <div className='display-group'>
+	return <div className='g1'>
 
-		<h2 className='page-header'>{header}</h2>
+		<h1 className='h1'>{header}</h1>
 
-		<div onClick={()=>goToMainMenu()} className='major-button'>
-			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		<div onClick={()=>goToMainMenu()} className='button2'>
+			<p className='button2-text'>BACK TO MAIN MENU</p>
 		</div>
 
 		<table>
@@ -80,15 +95,19 @@ export default function TableList(props) {
 						return <tr key={i} className='table-list-tr' onClick={()=>openItem(a[openKey])}>
 							{
 								fields.map((f,i)=>{
-									const value = a[f.fieldName];
+									const value = f.limit && typeof a[f.fieldName] === 'string' ? a[f.fieldName].slice(0,f.limit) : a[f.fieldName];
 									const fd = 
 										f.fd === 'vl' ? getValueListValue(value) : 
 										f.fd === 'date' ? printDate(value) : 
 										f.fd === 'cv' ? getCoreValueListValue(value) : 
+										f.fd === 'vp' ? getVendorPartnerAppStatus(value) :
 										f.fd === 'dollar' ? printDollar(value) : 
 										f.fd === 'pct' ? printPct(value) : 
 										value ;
-									const fs = f.fd === 'vl' ? formatPresetStyle : formatStyle;
+									const fs = 
+										f.fd === 'vl' ? formatPresetStyle : 
+										f.fd === 'vp' ? formatVpAppStatusStyle :
+										formatStyle;
 									return <td key={i} className='table-list-td' style={fs(value)}>{fd}</td>
 								})
 							}

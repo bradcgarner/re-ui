@@ -33,14 +33,14 @@ function App() {
 	const vpReferenceHash = {
 		'159': 14, // VP Reference
 	};
+	const vpShowReferencesHash = {
+		'29': true, // vp get on list
+		'31': true, // vp follow-up
+	}
 	const vpReferenceConstant = 159;
-	const vpStatusHash = {
-		'170': false, // not a VP
-		'171': true, // sent
-		'172': true, // review
-		'173': true, // ref check
-		'174': true, // active
-		'175': false, // denied
+	const vpBinaryHash = {
+		'170': false,
+		'189': true,
 	};
 	const dealFoundHash = {
 		'82': 95,
@@ -77,14 +77,28 @@ function App() {
 	};
 	const convoIntentionalHash = {
 		// intentional
-		'52': 168, // yes, ran model
-		'53': 168, // yes, did not run model
+		'218': 168, // lead vp
+		'219': 168, // new intro vp
+		'220': 168, // past client vp
+		'221': 168, // soi vp
+		'222': 168, // client vp
+		'223': 168, // post-vp
+		'224': 168, // vp
+		'225': 168, // vp reference
+		'44':  168, // ford
+		'45':  168, // geo
+		'46':  168, // forever home
+		'47':  168, // work being done
+		'203': 168, // listing consult
+		'204': 168, // buyer consult
 		// not intentional
 		'57': 169, // no did not run model
 		'54': 169, // n/a vague vm
-		'56': 169, // left vm
 		'55': 169, // not 2-way
+		'56': 169, // left vm
 		'58': 169, // did not connect
+		'226':169, // ghosting text
+		'51': 169, // other
 	};
 	const problemSolveHash = {
 		'59': true, // vp problem
@@ -206,7 +220,7 @@ function App() {
 					console.error(err);
 				});
 		}
-	});
+	}, [hasLoaded]);
 
 
 	// @@@@@@@@@@@ LOGIC @@@@@@@@@@@
@@ -247,7 +261,6 @@ function App() {
 			'convo_tone',
 			'convo_model',
 			'convo_intentional',
-			'convo_intentional_binary',
 			'convo_voice_note',
 			'convo_problem_solve',
 			'convo_deal_found',
@@ -299,7 +312,7 @@ function App() {
 	// @@@@@@@@@@@ RENDER @@@@@@@@@@@
 
   return hasLoaded ?
-    <div className="App">
+    <div className='g0'>
 			<App2
 				screenType={screenType}
 				id_agent={id_agent}
@@ -312,7 +325,8 @@ function App() {
 				referralHash={referralHash}
 				vpReferenceHash={vpReferenceHash}
 				vpReferenceConstant={vpReferenceConstant}
-				vpStatusHash={vpStatusHash}
+				vpShowReferencesHash={vpShowReferencesHash}
+				vpBinaryHash={vpBinaryHash}
 				dealFoundHash={dealFoundHash}
 				convoTypeHash={convoTypeHash}
 				convoIntentionalHash={convoIntentionalHash}

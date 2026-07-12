@@ -72,6 +72,7 @@ export const theFields = {
 		{
 			fieldName: 'dp_yesterday_notes', 
 			label: 'yesterday notes', 
+			limit: 50,
 		},
 		{
 			fieldName: 'dp_convo_goal', 
@@ -108,13 +109,14 @@ export const theFields = {
 		},
 		{
 			fieldName: 'timestamp_created', 
+			label: 'ts created',
 			fd: 'date'
 		},
 	],
 	activities: [
 		{
 			fieldName: 'date_convo_timestamp', 
-			label: 'id', 
+			label: 'date', 
 			fd: 'date'
 		},
 		{
@@ -123,7 +125,7 @@ export const theFields = {
 			fn: null
 		},
 		{
-			fieldName: 'convo_intentional_binary', 
+			fieldName: 'convo_intentional', 
 			label: 'intentional', 
 			fd: 'vl', 
 		},
@@ -153,11 +155,6 @@ export const theFields = {
 			fd: 'vl', 
 		},
 		{
-			fieldName: 'convo_intentional', 
-			label: 'intentional', 
-			fd: 'vl', 
-		},
-		{
 			fieldName: 'convo_type', 
 			label: 'type', 
 			fd: 'vl', 
@@ -175,6 +172,7 @@ export const theFields = {
 		{
 			fieldName: 'convo_notes', 
 			label: 'notes', 
+			limit: 50,
 		},
 		{
 			fieldName: 'convo_deal_found', 
@@ -187,6 +185,7 @@ export const theFields = {
 		},
 		{
 			fieldName: 'timestamp_created', 
+			label: 'ts created',
 			fd: 'date',
 		},
 		{
@@ -216,9 +215,11 @@ export const theFields = {
 		{
 			fieldName: 'fu_notes', 
 			label: 'notes', 
+			limit: 50,
 		},
 		{
 			fieldName: 'timestamp_created', 
+			label: 'ts created',
 			fd: 'date'
 		},
 		{
@@ -252,15 +253,17 @@ export const theFields = {
 		{
 			fieldName: 'contact_where_met_notes', 
 			label: 'where met', 
+			limit: 50,
 		},
 		{
 			fieldName: 'contact_notes', 
 			label: 'notes', 
+			limit: 50,
 		},
 		{
 			fieldName: 'contact_vp_status', 
 			label: 'vp status',
-			fd: 'vl', 
+			fd: 'vl',
 		},
 		{
 			fieldName: 'contact_vp_categories', 
@@ -277,6 +280,7 @@ export const theFields = {
 		{
 			fieldName: 'contact_tags', 
 			label: 'tags',
+			limit: 75,
 		},
 		{
 			fieldName: 'contact_address_street', 
@@ -311,6 +315,7 @@ export const theFields = {
 		},
 		{
 			fieldName: 'timestamp_created', 
+			label: 'ts created',
 			fd: 'date',
 		},
 		{
@@ -318,6 +323,59 @@ export const theFields = {
 		},
 		{
 			fieldName: 'id_contact_temp', 
+		},
+	],
+	vps: [
+		{
+			fieldName: 'contact_company', 
+			label: 'company',
+		},
+		{
+			fieldName: 'vp_app_status', 
+			fd: 'vp',
+		},
+		{
+			fieldName: 'contact_address_city', 
+			label: 'city',
+		},
+		{
+			fieldName: 'contact_address_state', 
+			label: 'state',
+		},
+		{
+			fieldName: 'contact_phone', 
+			label: 'phone', 
+		},
+		{
+			fieldName: 'contact_email', 
+			label: 'email', 
+		},
+		{
+			fieldName: 'contact_how_met', 
+			label: 'how met', 
+			fd: 'vl',
+		},
+		{
+			fieldName: 'contact_where_met', 
+			label: 'where met', 
+			fd: 'vl'
+		},
+		{
+			fieldName: 'contact_vp_status', 
+			label: 'vp status',
+			fd: 'vl',
+		},
+		{
+			fieldName: 'contact_vp_categories', 
+			label: 'vp categories',
+		},
+		{
+			fieldName: 'id_contact', 
+		},
+		{
+			fieldName: 'timestamp_created', 
+			label: 'ts created',
+			fd: 'date',
 		},
 	],
 	deals: [
@@ -377,6 +435,7 @@ export const theFields = {
 		{
 			fieldName: 'deal_notes', 
 			label: 'notes', 
+			limit: 50,
 		},
 		{
 			fieldName: 'deal_value_status', 
@@ -395,6 +454,7 @@ export const theFields = {
 		},
 		{
 			fieldName: 'timestamp_created', 
+			label: 'ts created',
 			fd: 'date',
 		},
 		{

@@ -5,7 +5,7 @@ export default function DevNotes(props) {
 	} = props;
 
 	return show ? 
-		<div className='small-group' style={{alignItems:'flex-start'}}>
+		<div className='g2' style={{alignItems:'flex-start'}}>
 			{
 				Array.isArray(text) ?
 				text.map((t,i)=>{

@@ -108,34 +108,48 @@ useEffect(()=> {
 
 	const loading = isLoading ? <Loading/> : null
 
-	const pageTop = <div className="page-top">
-		<h1 className="main-h1">SIMPLY REAL</h1>
+	const pageTop = <div className="landing-page-top">
+		<h1 className="landing-h1">SIMPLY REAL</h1>
 	</div>
 
 	const r = <span style={{fontSize:10,verticalAlign:'super'}}>&reg;</span>
 
-	return loginMode === 'reset' ?
+	const w1 = 430; // width of phone
+	const m1 = 10;
+	const w2 = w1 - (m1*2);
+	const w3 = w2 - (m1*2);
+	const wd = 120;
+	const w4 = w3 - (m1*2);
+	const w5 = w4 - (m1*2);
+	const wC1 = 40; // first letter to find contact
+	const wC2 = 330;// contact if first letter showing
+	const wCy = 250 // city
+	const wSt = 60; // state
+	const wZp = 70; // zip
 
-		<div className="display-group">
+	return <div className='the-app'>
+	 { loginMode === 'reset' ?
+
+		<div className="g2">
 			{pageTop}
-			<label className='edit-label'>
+			<label className='label3'>
 				Email
-				<input className='edit-input edit-input-wide'
+				<input className='input3'
 					value={agent.agent_email || ''}
 					onChange={e=>handleAgentChange('agent_email', e.target.value)}/>
 			</label>
 			<p>&nbsp;</p>
 			<p>&nbsp;</p>
-			<div onClick={()=>resetPw()} className='major-button'>
-				<p className='major-button-text'>RESET PASSWORD</p>
+			<div onClick={()=>resetPw()} className='button2'>
+				<p className='button2-text'>RESET PASSWORD</p>
 			</div> 
 			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('login')} className='small-button'>
-				<p className='small-button-text'>Log In</p>
+			<div onClick={()=>setLoginMode('login')} className='button4'>
+				<p className='button4-text'>Log In</p>
 			</div>
 			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('about')} className='small-button'>
-				<p className='small-button-text'>About</p>
+			<div onClick={()=>setLoginMode('about')} className='button4'>
+				<p className='button4-text'>About</p>
 			</div>
 			{loading}
 		</div> :
@@ -145,7 +159,7 @@ useEffect(()=> {
 
 		loginMode === 'about' ?
 
-		<div className="display-group">
+		<div className="g2">
 			{pageTop}
 			<p className="about-p">Simply Real is a tool to help Realtors{r} manage relationships and their business.</p>
 			<p className="about-p">This tool is built around the concept that human relationships are the most important aspect of real estate.</p>
@@ -168,40 +182,413 @@ useEffect(()=> {
 			<p className="about-p">Plan, Recap, Track, Talk</p>
 			<p className="about-p">Real estate really can be that simple.</p>
 			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('login')} className='small-button'>
-				<p className='small-button-text'>Log In</p>
+			<div onClick={()=>setLoginMode('login')} className='button4'>
+				<p className='button4-text'>Log In</p>
 			</div>
 			{loading}
 		</div> :
 
-		<div className="display-group">
+		<div className="g2">
 			{pageTop}
-			<label className='edit-label'>
+			<label className='label3'>
 				Email
-				<input className='edit-input edit-input-wide'
+				<input className='input3'
 					value={agent.agent_email || ''}
 					onChange={e=>handleAgentChange('agent_email', e.target.value)}/>
 			</label>
-			<label className='edit-label'>
+			<label className='label3'>
 				Password
-				<input className='edit-input edit-input-wide'
+				<input className='input3'
 					value={agent.agent_password || ''}
 					onChange={e=>handleAgentChange('agent_password', e.target.value)}/>
 			</label>
 			<p>&nbsp;</p>
 			<p>&nbsp;</p>
-			<div onClick={()=>logIn()} className='major-button'>
-				<p className='major-button-text'>LOG IN</p>
+			<div onClick={()=>logIn()} className='button2'>
+				<p className='button2-text'>LOG IN</p>
 			</div>
 			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('reset')} className='small-button'>
-				<p className='small-button-text'>Reset Password</p>
+			<div onClick={()=>setLoginMode('reset')} className='button4'>
+				<p className='button4-text'>Reset Password</p>
 			</div>
 			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('about')} className='small-button'>
-				<p className='small-button-text'>About</p>
+			<div onClick={()=>setLoginMode('about')} className='button4'>
+				<p className='button4-text'>About</p>
 			</div>
 			{loading}
+		</div> 
+		}
+		<style>{`
+					
+			.g0 {
+				flex-direction: column;
+				width: 100vw;
+				align-items: center;
+			}
+
+			.g1 {
+				flex-direction: column;
+				padding: 0px;
+				width: ${w1}px;
+				margin-bottom: 1vh;
+				align-items: center;
+			}
+			.g2 {
+				flex-direction: column;
+				padding: 10px;
+				width: ${w2}px;
+				margin-bottom: 1vh;
+			}
+			.g2-multi {
+				border: 1px solid #C5E2F6;
+				border-radius: 10px;
+				padding: 10px;
+			}
+			.g2-deal {
+				background-color: #e4f2fb;
+			}
+			.g2-fu {
+				background-color: #f9f7f6;
+			}
+			.g2-contact {
+				background-color: #f4f4f4;
+			}
+			.g2-app {
+				background-color: #0083C0;
+			}
+			.divider {
+				width: 100%;
+				height: 20px;
+				margin-bottom: 20px;
+				border-bottom: 5px solid #0083C0;
+			}
+
+			.h1, 
+			.h2 {
+				width: 100%;
+				text-align: center;
+			}
+			.h1 {
+				font-size: 30px;
+				letter-spacing: 5px;
+				background-image: linear-gradient(to left, #83C2E4, #8083C0);
+				background-clip: text;
+				-webkit-background-clip: text;
+				color: transparent;
+				display: inline-block;
+				margin-top: 15px;
+				margin-bottom: 15px;
+			}
+			.h2 {
+				font-size: 18px;
+				margin-bottom: 7px;
+				color: #0083C0;
+			}
+			.p2 {
+				width: ${w2}px;
+				margin-bottom: 7px;
+			}
+			.about-p {
+				margin-bottom: 10px;
+				text-align: center;
+			}
+			.reminder {
+				font-style: italic;
+				color: #f2b3bf;
+				font-size: 14px;
+				margin-bottom: 7px;
+			}
+			.instructions {
+				font-style: italic;
+				color: #0083C0;
+				font-size: 12px;
+				margin-bottom: 5px;
+			}
+			.dev-notes {
+				font-style: italic;
+				color: #ccc;
+				font-size: 12px;
+				margin-bottom: 5px;
+			}
+
+			.loader-background {
+				position: fixed;
+				height: 100vh;
+				width: 100vw;
+				top: 0;
+				left: 0;
+				justify-content: center;
+				align-items: center;
+			}
+			.loader-fill {
+				position: absolute;
+				height: 100vh;
+				width: 100vw;
+				top: 0;
+				left: 0;
+				background-color: #E6F2FF;
+				opacity: 0.7;
+			}
+
+			.loader {
+				--R: 150px;
+				--g1: #0083C0 96%, #0000;
+				--g2: #eeeeee 96%, #0000;
+				width: calc(2*var(--R));
+				aspect-ratio: 1;
+				border-radius: 50%;
+				display: grid;
+				-webkit-mask: linear-gradient(#000 0 0);
+				animation: l30 2s infinite linear;
+			}
+			.loader::before,
+			.loader::after{
+				content:"";
+				grid-area: 1/1;
+				width: 50%;
+				background:
+					radial-gradient(farthest-side,var(--g1)) calc(var(--R) + 0.866*var(--R) - var(--R)) calc(var(--R) - 0.5*var(--R)   - var(--R)),
+					radial-gradient(farthest-side,var(--g1)) calc(var(--R) + 0.866*var(--R) - var(--R)) calc(var(--R) - 0.5*var(--R)   - var(--R)),
+					radial-gradient(farthest-side,var(--g2)) calc(var(--R) + 0.5*var(--R)   - var(--R)) calc(var(--R) - 0.866*var(--R) - var(--R)),
+					radial-gradient(farthest-side,var(--g1)) 0 calc(-1*var(--R)),
+					radial-gradient(farthest-side,var(--g2)) calc(var(--R) - 0.5*var(--R)   - var(--R)) calc(var(--R) - 0.866*var(--R) - var(--R)),
+					radial-gradient(farthest-side,var(--g1)) calc(var(--R) - 0.866*var(--R) - var(--R)) calc(var(--R) - 0.5*var(--R)   - var(--R)),
+					radial-gradient(farthest-side,var(--g2)) calc(-1*var(--R))  0,
+					radial-gradient(farthest-side,var(--g1)) calc(var(--R) - 0.866*var(--R) - var(--R)) calc(var(--R) + 0.5*var(--R)   - var(--R));
+				background-size: calc(2*var(--R)) calc(2*var(--R));
+				background-repeat :no-repeat;
+			}
+			.loader::after {
+			transform: rotate(180deg);
+			transform-origin: right;
+			}
+
+			@keyframes l30 {
+				100% {transform: rotate(-1turn)}
+			}
+
+
+			.landing-page-top {
+				height: 35vh;
+				justify-content: center;
+				align-items: center;
+				flex-direction: column;
+			}
+			.landing-h1 {
+				font-size: 80px;
+				text-align: center;
+				line-height: 150%;
+				letter-spacing: 7px;
+				background-image: linear-gradient(to right, #83C2E4, #8083C0);
+				background-clip: text;
+				-webkit-background-clip: text;
+				color: transparent;
+				display: inline-block;
+			}
+			.landing-screen {
+				align-items: center;
+				justify-content: center;
+				flex-wrap: wrap;
+				width: 100vw;
+				padding: 5vw;
+			}
+
+
+
+			.about-li {
+				list-style:square;
+				margin-left: 15px;
+				font-size:smaller;
+				margin-bottom: 10px;
+			}
+
+			.label3,
+			.label2 {
+				display: flex;
+				flex-direction: column;
+				margin-bottom: 7px;
+				font-size: 13px;
+				color: #63B3DB;
+			}
+			.label-white {
+				color: white;
+			}
+			.label2 {
+				width: ${w2}px;
+			}
+			.label3 {
+				width: ${w3}px;
+			}
+			.label-d {
+				width: ${wd}px;
+			}
+			.input2,
+			.input3,
+			.input4,
+			.input5A,
+			.input5B,
+			.input-d {
+				font-size: 16px;
+				padding: 3px;
+				margin-bottom: 3px;
+				border: 0.5px solid #0083C0;
+				color: #0083C0;
+				font-family: 'Arial';
+			}
+			.input-d {
+				width: ${wd}px;
+			}
+			.input2 {
+				width: ${w2}px;
+			}
+			.input3 {
+				width: ${w3}px;
+			}
+			.input4 {
+				width: ${w4}px;
+			}
+			.input5A {
+				width: ${wC1}px;
+			}
+			.input5B {
+				width: ${wC2}px;
+			}
+			.input6A {
+				width: ${wCy}px;
+			}
+			.input6B {
+				width: ${wSt}px;
+			}
+			.input6C {
+				width: ${wZp}px;
+			}
+			.input5-row,
+			.input6-row {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+			}
+			.input5-row {
+				width: ${w2}px;
+			}
+			.input6-row {
+				width: ${w3}px;
+			}
+			.input-taller {
+				min-height: 100px;
+			}
+			.input-tallest {
+				min-height: 250px;
+			}
+
+			.main-menu-button {
+				width: ${w2}px;
+				height: 50px;
+				align-items: center;
+				justify-content: center;
+				margin-bottom: 10px;
+				cursor: pointer;
+			}
+			.button2, 
+			.button3, 
+			.button4 {
+				width: ${w2}px;
+				align-items: center;
+				justify-content: center;
+				background-color: transparent;
+				cursor: pointer;
+			}
+			.button2 {
+				height: 50px;
+				background-image: linear-gradient(to right, #83C2E4, #8083C0);
+				margin-bottom: 15px;
+			}
+			.button3 {
+				height: 30px;			
+				margin-bottom: 10px;
+			}
+			.button4 {
+				height: 22px;
+				margin-bottom: 7px;
+			}
+			.button4-3 {
+				width: ${w3}px;
+			}
+			.button2:hover,
+			.button3:hover,
+			.button4:hover {
+				opacity: 0.75;
+			}
+			.button2-text,
+			.button3-text,
+			.button4-text {
+				text-align: center;
+				font-weight: bold;
+				color: white;
+			}
+			.button3, .button4 {
+				background-image: linear-gradient(to right, #2193C9, #83C2E4);
+				cursor: pointer;
+			}
+
+			.date-container2,
+			.date-container3 {
+				flex-direction: row;
+				justify-content: space-between;
+			}
+			.date-container2 {
+				width: ${w2}px;
+			}
+			.date-container3 {
+				width: ${w3}px;
+			}
+
+			.table-list-tr {
+				cursor: pointer;
+				max-height: 50px;
+			}
+			.table-list-tr:hover {
+				opacity: 0.75;
+			}
+			.table-list-td {
+				max-width: 100px;
+			}
+
+			.pie-chart {
+				position: relative;
+				width: 370px;
+				min-height: 400px;
+				margin: 0;
+			}
+			.pie-chart h2 {
+				margin: 15px;
+				text-align: center;
+				width: 100%;
+			}
+			.pie-chart figcaption {
+				position: absolute;
+				bottom: 1em;
+				right: 1em;
+				font-size: smaller;
+				text-align: right;
+			}
+			.pie-chart span:after {
+				display: inline-block;
+				content: "";
+				width: 0.8em;
+				height: 0.8em;
+				margin-left: 0.4em;
+				height: 0.8em;
+				border-radius: 0.2em;
+				background: currentColor;
+			}
+
+			.graph-container {
+				display: block;
+				width: 100vw;
+				height: 100vh;
+			}
+		`}</style>
 	</div>
 
 }

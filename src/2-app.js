@@ -19,7 +19,6 @@ import Contact from './7-contact';
 import Deal from './7-deal';
 import DailyPlan from './4-daily-plan';
 import Proformae from './3-proformae';
-import VendorPartner from './7-vp';
 import Metrics from './8-metrics';
 import Coach from './99-coach';
 import TableList from './9-table-list';
@@ -42,7 +41,8 @@ function App2(props) {
 		referralHash,
 		vpReferenceHash,
 		vpReferenceConstant,
-		vpStatusHash,
+		vpShowReferencesHash,
+		vpBinaryHash,
 		dealFoundHash,
 		dealsHash,
 		convoTypeHash,
@@ -73,7 +73,10 @@ function App2(props) {
 	const [fus, setFus] = useState([]);
 
 	const [contacts, setContacts] = useState([]);
+	const [vps, setVPs] = useState([]);
 	const [contact, setContact] = useState({});
+	const [vpAppStatusHash, setVpAppStatusHash] = useState({});
+	const [contactVPApp, setContactVPApp] = useState({});
 
 	const [deals, setDeals] = useState([]);
 	const [deal, setDeal] = useState({});
@@ -208,7 +211,7 @@ function App2(props) {
 			body: JSON.stringify(proformae),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/proformae/`, init)
+		fetch(`${REACT_APP_API_URL}api/proformae`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -244,7 +247,7 @@ function App2(props) {
 			method: 'GET',
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
-		fetch(`${REACT_APP_API_URL}api/daily-plans/`, init)
+		fetch(`${REACT_APP_API_URL}api/daily-plans`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -354,7 +357,6 @@ function App2(props) {
 			convo_tone: null,
 			convo_model: null,
 			convo_intentional: null,
-			convo_intentional_binary: null,
 			convo_type: null,
 			convo_voice_note: null,
 			convo_problem_solve: null,
@@ -375,7 +377,7 @@ function App2(props) {
 			method: 'GET',
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
-		fetch(`${REACT_APP_API_URL}api/activities/`, init)
+		fetch(`${REACT_APP_API_URL}api/activities`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -470,7 +472,7 @@ function App2(props) {
 			connection_record_type: null,
 			connection_type: null,
 			connection_notes: null,
-			conection_vp_reference: null,
+			connection_vp_reference: null,
 		};
 
 		const dealFieldsToClear = {
@@ -498,12 +500,13 @@ function App2(props) {
 		const isATempId = tempIdKeys[`${finalField}`];
 		const valueFormatted = 
 			isATempId ? value :
+			finalField === 'contact_where_met_notes' ? value : 
 			correctInputType(value, finalField, inputFormatOptions);
 		const isADate = dateIntegerHash[finalField];
 		const isGci = finalField === 'deal_value' || finalField === 'deal_commission_rate';
 		const isDealFound = finalField === 'deal_how_found';
 		const isConvoType = finalField === 'convo_main_purpose';
-		const isConvoIntention = finalField === 'convo_intentional';
+		const isConvoIntention = finalField === 'convo_model';
 		const mightBeAVPReference = finalField === 'connection_type';
 		const isAContactChange = finalField === 'id_contact';
 		const isADealChange = finalField === 'id_deal';
@@ -635,7 +638,7 @@ function App2(props) {
 				newActivity.convo_type = convoTypeHash[`${newActivity[one]}`];
 			}
 			if(isConvoIntention){
-				newActivity.convo_intentional_binary = convoIntentionalHash[`${newActivity[one]}`];
+				newActivity.convo_intentional = convoIntentionalHash[`${newActivity[one]}`];
 			}
 		}
 
@@ -712,7 +715,7 @@ function App2(props) {
 		if(connection_record_type === 'connection'){
 			newContact.connection_type = null;
 			newContact.connection_notes = '';
-			newContact.conection_vp_reference = '';
+			newContact.connection_vp_reference = '';
 		} 
 		if(connection_record_type === 'main'){
 			newActivity.contacts.push(newContact);
@@ -803,13 +806,12 @@ function App2(props) {
 			},
 			body: JSON.stringify(activity),
 		};
-		fetch(`${REACT_APP_API_URL}api/activities/`, init)
+		fetch(`${REACT_APP_API_URL}api/activities`, init)
 			.then(res=>{
 				return res.json();
 			})
 			.then(r=>{
 				setActivity(r);
-				console.log(r)
 				setIsLoading(false);
 			})
 			.catch(err=>{
@@ -819,13 +821,13 @@ function App2(props) {
 
 	// @@@@@@@@@@@@@@@@@ CONTACTS @@@@@@@@@@@@@@@@@@@@
 
-	const listContacts = limitToVPs => {
+	const listContacts = () => {
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
-		fetch(`${REACT_APP_API_URL}api/contacts/`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -836,11 +838,8 @@ function App2(props) {
 							return {...a, contactName}
 						}) : [];
 					setContacts(newContacts);
-					if(limitToVPs){
-						setMode('vps');
-					} else {
-						setMode('contacts');
-					}
+					setMode('contacts');
+					scrollToTop();
 					setIsLoading(false);
 				})
 				.catch(err=>{
@@ -848,8 +847,56 @@ function App2(props) {
 				});
 	};
 
+	const listVPs = () => {
+		setIsLoading(true);
+		const init = {
+			method: 'GET',
+			headers: {Authorization: `Bearer ${localStorage.authToken}`},
+		};
+		fetch(`${REACT_APP_API_URL}api/contacts/vps`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				const vendorPartners = r && Array.isArray(r.vps) ? r.vps : [];
+
+				if(Array.isArray(vendorPartners)){
+					setVPs(vendorPartners);
+					setVpAppStatusHash(r.vpAppStatusHash);
+					setMode('vps');
+					scrollToTop();
+				}
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
 	const listVPCategories = () => {
-		setMode('vp-categories');
+		setIsLoading(true);
+		const init = {
+			method: 'GET',
+			headers: {Authorization: `Bearer ${localStorage.authToken}`},
+		};
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-categories`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				const vendorPartners = r && Array.isArray(r.vps) ? r.vps : [];
+
+				if(Array.isArray(vendorPartners)){
+					setVPs(vendorPartners);
+					setVpAppStatusHash(r.vpAppStatusHash);
+					setMode('vp-categories');
+					scrollToTop();
+				}
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
 	};
 
 	const openContact = id_contact => {
@@ -864,6 +911,7 @@ function App2(props) {
 			})
 			.then(r=>{
 				setContact(r);
+				setContactVPApp({}); // clear out since a new contact
 				setMode('contact');
 				setIsLoading(false);
 				scrollToTop();
@@ -888,7 +936,7 @@ function App2(props) {
 				return res.json();
 			})
 			.then(r=>{
-				setProformae(r);
+				setContact(r);
 				setIsLoading(false);
 			})
 			.catch(err=>{
@@ -897,11 +945,264 @@ function App2(props) {
 	};
 
 	const handleContactChange = (k, v) => {
-		const valueFormatted = correctInputType(v, k, inputFormatOptions);
+		const valueFormatted = k === 'contact_where_met_notes' ? v : correctInputType(v, k, inputFormatOptions);
 		const newC = JSON.parse(JSON.stringify(contact));
 		newC[k] = valueFormatted;
 		
 		setContact(newC);
+	};
+
+	const getContactVPApp = id_contact => {
+		if(!id_contact){
+			return;
+		}
+		const init = {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app/${id_contact}`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setContactVPApp(r);
+				setIsLoading(false);
+			})
+	};
+
+	const initiateVPApplication = () => {
+		const vpForAppDB = {
+			id_contact: contact.id_contact,
+			id_agent,
+			vp_name_business: contact.contact_company || null,
+			vp_phone: contact.contact_phone || null,
+			vp_email: contact.contact_email || null,
+			vp_url: contact.contact_url || null,
+		};
+
+		setIsLoading(true);
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(vpForAppDB),
+		};
+		fetch(`${REACT_APP_API_URL}api/open`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				const newContact = JSON.parse(JSON.stringify(contact));
+				newContact.vp_app = r;
+				setContact(newContact);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
+	const sendVPApplication = () => {
+		const vpApp = contact.vp_app || {};
+		const vp = {
+			id_contact: contact.id_contact,
+			contact_name_first: contact.contact_name_first,
+			contact_email: contact.contact_email,
+			contact_company: contact.contact_company,
+			id_vp_app: vpApp.id_vp_app,
+			vp_temp_id: vpApp.vp_temp_id,
+		};
+		let ok = true;
+		for(let k in vp){
+			if(!vp[k]){
+				ok = false;
+			}
+		}
+		if(!ok){
+			console.log('MISSING DATA',vp);
+			return;
+		}
+
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+			body: JSON.stringify(vp),
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/send-vp-app`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setContact(r);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
+	const markVPAppInReview = () => {
+		const vpApp = contact.vp_app || {};
+		const vp = {
+			id_contact: contact.id_contact,
+			id_vp_app: vpApp.id_vp_app,
+		};
+		let ok = true;
+		for(let k in vp){
+			if(!vp[k]){
+				ok = false;
+			}
+		}
+		if(!ok){
+			console.log('MISSING DATA',vp);
+			return;
+		}
+
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+			body: JSON.stringify(vp),
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/review-vp-app`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setContact(r);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
+	const markVPAppComplete = () => {
+		const vpApp = contact.vp_app || {};
+		const vp = {
+			id_contact: contact.id_contact,
+			id_vp_app: vpApp.id_vp_app,
+		};
+		let ok = true;
+		for(let k in vp){
+			if(!vp[k]){
+				ok = false;
+			}
+		}
+		if(!ok){
+			console.log('MISSING DATA',vp);
+			return;
+		}
+
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+			body: JSON.stringify(vp),
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/activate-vp`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setContact(r);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
+	const reOpenVPAppForEditing = () => {
+		const vpApp = contact.vp_app || {};
+		const vp = {
+			id_contact: contact.id_contact,
+			id_vp_app: vpApp.id_vp_app,
+		};
+		let ok = true;
+		for(let k in vp){
+			if(!vp[k]){
+				ok = false;
+			}
+		}
+		if(!ok){
+			console.log('MISSING DATA',vp);
+			return;
+		}
+
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+			body: JSON.stringify(vp),
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/open-vp-app`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setContact(r);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
+	const declineVPApp = () => {
+		const vpApp = contact.vp_app || {};
+		const vp = {
+			id_contact: contact.id_contact,
+			id_vp_app: vpApp.id_vp_app,
+		};
+		let ok = true;
+		for(let k in vp){
+			if(!vp[k]){
+				ok = false;
+			}
+		}
+		if(!ok){
+			console.log('MISSING DATA',vp);
+			return;
+		}
+
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+			body: JSON.stringify(vp),
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/decline-vp`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setContact(r);
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
 	};
 
 	// @@@@@@@@@@@@@@@@@ DEALS @@@@@@@@@@@@@@@@@@@@
@@ -912,7 +1213,7 @@ function App2(props) {
 			method: 'GET',
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
-		fetch(`${REACT_APP_API_URL}api/deals/`, init)
+		fetch(`${REACT_APP_API_URL}api/deals`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -928,6 +1229,7 @@ function App2(props) {
 						}) : [];
 					setDeals(newDeals);
 					setMode('deals');
+					scrollToTop();
 					setIsLoading(false);
 				})
 				.catch(err=>{
@@ -966,12 +1268,11 @@ function App2(props) {
 			body: JSON.stringify(deal),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/deals/`, init)
+		fetch(`${REACT_APP_API_URL}api/deals`, init)
 			.then(res=>{
 				return res.json();
 			})
 			.then(r=>{
-				console.log(r)
 				setDeal(r);
 				setIsLoading(false);
 			})
@@ -1024,16 +1325,22 @@ function App2(props) {
 				setMode('incomeGraph');
 				setIncomeData(r);
 				setIsLoading(false);
+				scrollToTop();
 			})
 			.catch(err=>{
 				console.error(err);
 			});
 	};
 
+	const getMetrics = () => {
+		setMode('metrics');
+	}
+
 	// @@@@@@@@@@@@@@@@@ COACHING @@@@@@@@@@@@@@@@@@@@
 
 	const openCoach = coachMode => {
 		setMode(coachMode);
+		scrollToTop();
 	};
 
 	const openCoreValues = () => {
@@ -1050,6 +1357,7 @@ function App2(props) {
 				setCoreValues(r);
 				setMode('core values');
 				setIsLoading(false);
+				scrollToTop();
 			})
 			.catch(err=>{
 				console.error(err);
@@ -1099,10 +1407,12 @@ function App2(props) {
 			listActivities={listActivities}
 			listFus={listFus}
 			listContacts={listContacts}
+			listVPs={listVPs}
 			listVPCategories={listVPCategories}
 			listDeals={listDeals}
 			openProformae={openProformae}
 			getIncomeGraph={getIncomeGraph}
+			getMetrics={getMetrics}
 			openCoach={openCoach}
 			openCoreValues={openCoreValues}
 		/> :
@@ -1149,7 +1459,9 @@ function App2(props) {
 			formatStyle={formatStyle}
 			openDeal={openDeal}
 			openContact={openContact}
+			getContactVPApp={getContactVPApp}
 			openActivity={openActivity}
+			contactVPApp={contactVPApp}
 			modePrior={modePrior}
 			activity={activity}
 			optionsHash={optionsHash}
@@ -1157,7 +1469,8 @@ function App2(props) {
 			valueListsHash={valueListsHash}
 			referralHash={referralHash}
 			vpReferenceHash={vpReferenceHash}
-			vpStatusHash={vpStatusHash}
+			vpBinaryHash={vpBinaryHash}
+			vpShowReferencesHash={vpShowReferencesHash}
 			problemSolveHash={problemSolveHash}
 			newContactOptions={newContactOptions}
 			newDealOptions={newDealOptions}
@@ -1211,12 +1524,13 @@ function App2(props) {
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
 			valueListsHash={valueListsHash}
+			vpAppStatusHash={vpAppStatusHash}
 			mode={mode}
 			openItem={openContact}
 			openKey={'id_contact'}
 			header='VENDOR PARTNERS'
-			items={contacts}
-			theFields={theFields.contacts}
+			items={vps}
+			theFields={theFields.vps}
 		/> :
 		mode === 'vp-categories' ?
 		<TableList 
@@ -1236,31 +1550,26 @@ function App2(props) {
 		<Contact
 			goToMainMenu={goToMainMenu}
 			listContacts={listContacts}
+			listVPs={listVPs}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
 			saveContact={saveContact}
 			handleContactChange={handleContactChange}
 			openDeal={openDeal}
 			openActivity={openActivity}
+			initiateVPApplication={initiateVPApplication}
+			sendVPApplication={sendVPApplication}
+			markVPAppInReview={markVPAppInReview}
+			markVPAppComplete={markVPAppComplete}
+			reOpenVPAppForEditing={reOpenVPAppForEditing}
+			declineVPApp={declineVPApp}
 			contact={contact}
 			valueListsHash={valueListsHash}
+			vpBinaryHash={vpBinaryHash}
 			referralHash={referralHash}
 			optionsHash={optionsHash}
-			vpStatusHash={vpStatusHash}
 			modePrior={modePrior}
 			mode={mode}
-		/> :
-		mode === 'vp' ?
-		<VendorPartner
-			goToMainMenu={goToMainMenu}
-			listContacts={listContacts}
-			formatPresetStyle={formatPresetStyle}
-			formatStyle={formatStyle}
-			saveContact={saveContact}
-			contact={contact}
-			valueListsHash={valueListsHash}
-			optionsHash={optionsHash}
-			modePrior={modePrior}
 		/> :
 		mode === 'deals' ?
 		<TableList 
@@ -1287,11 +1596,11 @@ function App2(props) {
 			openContact={openContact}
 			openActivity={openActivity}
 			deal={deal}
+			vpBinaryHash={vpBinaryHash}
 			valueListsHash={valueListsHash}
 			optionsHash={optionsHash}
 			modePrior={modePrior}
 			referralHash={referralHash}
-			vpStatusHash={vpStatusHash}
 		/> :
 		mode === 'proformae' ?
 		<Proformae
@@ -1327,7 +1636,7 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			coreValues={coreValues}
 		/> :
-		<h2>Nothing To Load</h2>
+		<h1>Nothing To Load</h1>
 }
 
 export default App2;

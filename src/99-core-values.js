@@ -14,27 +14,27 @@ export default function CoreValues(props) {
 	const cv = Array.isArray(coreValues) ? coreValues : [];
 	const header = cv.header || 'COACHING';
 
-	return <div className='display-group'>
+	return <div className='g1'>
 
-		<h2 className='page-header'>{header}</h2>
+		<h1 className='h1'>{header}</h1>
 
-		<div onClick={()=>goToMainMenu()} className='major-button'>
-			<p className='major-button-text'>BACK TO MAIN MENU</p>
+		<div onClick={()=>goToMainMenu()} className='button2'>
+			<p className='button2-text'>BACK TO MAIN MENU</p>
 		</div>
 
-		<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-			<p className='major-button-text'>
+		<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
+			<p className='button2-text'>
 				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
 			</p>
 		</div>
 		<p>&nbsp;</p>
-		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-			<p className='major-button-text'>
+		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
+			<p className='button2-text'>
 				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
 			</p>
 		</div>
 
-		<div className='display-group'>
+		<div className='g2'>
 
 		</div>
 
@@ -44,8 +44,8 @@ export default function CoreValues(props) {
 
 		{
 			cv.map((v,i)=>{
-				return <div key={i} className='display-group'>
-					<h2 className='group-header'>{v.cv_label}</h2>
+				return <div key={i} className='g2'>
+					<h2 className='h2'>{v.cv_label}</h2>
 					<p>{v.cv_notes}</p>
 				</div>
 			})

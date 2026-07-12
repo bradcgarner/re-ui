@@ -5,7 +5,7 @@ export default function Instructions(props) {
 	} = props;
 
 	return show && text ? 
-		<div className='small-group'>
+		<div className='g2'>
 			<p className='instructions'>
 				{text}
 			</p> 

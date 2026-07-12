@@ -5,7 +5,7 @@ export default function Reminder(props) {
 	} = props;
 
 	return show ? 
-		<div className='small-group'>
+		<div className='g2'>
 			<p className='reminder'>
 				{text}
 			</p> 

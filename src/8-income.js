@@ -13,22 +13,22 @@ export default function Income(props) {
 	const [showInstructions, setShowInstructions] = useState(false);
 	const [showDevNotes, setShowDevNotes] = useState(false);
 
-	return <div className='display-group'>
+	return <div className='g1'>
 
-		<h2 className='page-header'>INCOME FORECAST</h2>
+		<h1 className='h1'>INCOME FORECAST</h1>
 
-			<div onClick={()=>goToMainMenu()} className='major-button'>
-				<p className='major-button-text'>BACK TO MAIN MENU</p>
+			<div onClick={()=>goToMainMenu()} className='button2'>
+				<p className='button2-text'>BACK TO MAIN MENU</p>
 			</div>
 
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='small-button'>
-				<p className='major-button-text'>
+			<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
+				<p className='button2-text'>
 					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
 				</p>
 			</div>
 			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='small-button'>
-				<p className='major-button-text'>
+			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
+				<p className='button2-text'>
 					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
 				</p>
 			</div>
