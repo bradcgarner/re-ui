@@ -14,7 +14,7 @@ export default function Deal(props) {
 		handleDealChange,
 		listDeals,
 		deal,
-		// valueListsHash,
+		// vLItemsHash,
 		formatPresetStyle,
 		formatStyle,
 		saveDeal,
@@ -23,6 +23,7 @@ export default function Deal(props) {
 		openActivity,
 		vpBinaryHash,
 		openContact,
+		modePrior,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);
@@ -344,11 +345,16 @@ export default function Deal(props) {
 		<div onClick={()=>saveDeal()} className='button2'>
 			<p className='button2-text'>SAVE</p>
 		</div>
+		{
+			modePrior === 'deals' ? 
+			<div onClick={()=>listDeals()} className="button2">
+				<p className="button2-text">Back to List Deals</p>
+			</div> :
+			null
+		}
+
 		<div onClick={()=>goToMainMenu()} className='button2'>
 			<p className='button2-text'>BACK TO MAIN MENU</p>
-		</div>
-		<div onClick={()=>listDeals()} className="button2">
-			<p className="button2-text">Back to List Deals</p>
 		</div>
 	</div>
 }

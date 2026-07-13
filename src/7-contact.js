@@ -15,10 +15,11 @@ export default function Contact(props) {
 		formatStyle,
 		saveContact,
 		handleContactChange,
+		handleVPSelection,
 		openDeal,
 		openActivity,
 		contact,
-		// valueListsHash,
+		// vLItemsHash,
 		vpBinaryHash,
 		referralHash,
 		optionsHash,
@@ -60,7 +61,6 @@ export default function Contact(props) {
 	const vpAppStatus = vpApp.vp_app_status || 0;
 	const vpAppStatusData = vpAppStatusHash[`${vpAppStatus}`] || {};
 	const vpAppStatusLabel = vpAppStatusData.label || '';
-	const vpAppStatusText = vpAppStatusData.text || '';
 	const vpAppLink = `${process.env.REACT_APP_VP_APP_URL}${vpApp.vp_temp_id}`;
 
 	return <div className='g1'>
@@ -148,7 +148,7 @@ export default function Contact(props) {
 			{
 				vpAppExists ? <div className='button4'>
 						<p className='button2-text'>
-							<a href={vpAppLink} target="_blank">
+							<a href={vpAppLink} target="_blank" rel="noreferrer">
 								Go To VP Application
 							</a>
 						</p>
@@ -223,13 +223,128 @@ export default function Contact(props) {
 			{
 				isAVP ?
 					<label className='label2'>
-						Vendor Partner Categories (separate using commas)
-						<textarea className='input2 input-taller'
-							value={c.contact_vp_categories || ''}
-							onChange={e=>handleContactChange('contact_vp_categories', e.target.value)}/>
+						Vendor Partner Categories
+						<div className='vp-categories-container'>
+						{
+							Array.isArray(c.contact_vp_categories) ?
+							c.contact_vp_categories.map((c,i)=>{
+								return <p key={i} className='vp-category'
+									onClick={()=>handleVPSelection(c)}>{c}</p>
+							}): null
+						}
+						</div>
+						<select className='input2'
+							value={c.vpTempSelection || ''}
+							onChange={e=>handleVPSelection(e.target.value)}>
+								{optionsHash.vpCategories}
+						</select>
 					</label> : null
 			}
 		</div>
+
+		{
+			vpAppExists && isAVP ?
+			<div className='g1'>
+				<h3 className='h2'>VP APPLICATION</h3>
+				<div className='g2 g2-multi g2-app'>
+		
+					<p className='p1 label-white'>Application Status: {vpAppStatusLabel}</p>
+					<p>&nbsp;</p>
+
+					<label className='label3 label-white'>
+						Business Name
+						<input className='input3'
+							value={vpApp.vp_name_business || ''}
+							readOnly />
+					</label>
+
+					<label className='label3 label-white'>
+						What type of business are you? (plumber, roofer, electrician, restaurant, etc)
+						<textarea className='input3'
+							value={vpApp.vp_type || ''}
+							readOnly />
+					</label>
+
+					<label className='label3 label-white'>
+						Best Contact Person
+						<input className='input3'
+							value={vpApp.vp_contact_person || ''}
+							readOnly />
+					</label>
+
+					<label className='label3 label-white'>
+						Business Phone Number
+						<input className='input3'
+							value={vpApp.vp_phone || ''}
+							readOnly />
+					</label>
+
+					<label className='label3 label-white'>
+						Business Email
+						<input className='input3'
+							value={vpApp.vp_email || ''}
+							readOnly/>
+					</label>
+
+					<label className='label3 label-white'>
+						Website
+						<input className='input3'
+							value={vpApp.vp_url || ''}
+							readOnly/>
+					</label>
+
+					<label className='label3 label-white'>
+						What is your service area? We only want to refer you to customers in areas you service.	
+						<textarea className='edit-input edit-textarea edit-input-wide-nest'
+							value={vpApp.vp_area || ''}
+							readOnly/>
+					</label>
+
+					<label className='label3 label-white'>
+						Best URL/link we can send our clients to leave you an online review (Google, Yelp, Facebook, etc.)
+						<input className='input3'
+							value={vpApp.vp_review_url || ''}
+							readOnly/>
+					</label>
+
+					<div className='divider'/>
+
+					<label className='label3 label-white'>
+						Do you agree to provide three past customers so we can place that 2 minute call and maintain integrity for our list?
+						<select className='input3'
+							value={vpApp.vp_agree || ''}
+							readOnly >
+								<option key={-1} value={' '}>{' '}</option>
+								<option key={0} value={'Yes'}>{'Yes'}</option>
+								<option key={1} value={'No'}>{'No'}</option>
+						</select>
+					</label>
+
+					<label className='label3 label-white'>
+						First Past Client We Can Contact For A Testimonial (Name & Phone Number)				
+						<textarea className='edit-input edit-textarea edit-input-wide-nest'
+							value={vpApp.vp_ref1 || ''}
+							readOnly />
+					</label>
+
+					<label className='label3 label-white'>
+						Second Past Client We Can Contact For A Testimonial (Name & Phone Number)				
+						<textarea className='edit-input edit-textarea edit-input-wide-nest'
+							value={vpApp.vp_ref2 || ''}
+							readOnly />
+					</label>
+
+					<label className='label3 label-white'>
+						Third Past Client We Can Contact For A Testimonial (Name & Phone Number)				
+						<textarea className='edit-input edit-textarea edit-input-wide-nest'
+							value={vpApp.vp_ref3 || ''}
+							readOnly />
+					</label>
+				</div>
+						
+			</div> : 
+			null 
+		}
 
 		<div className='divider'/>
 
@@ -554,17 +669,18 @@ export default function Contact(props) {
 		<div onClick={()=>saveContact()} className='button2'>
 			<p className='button2-text'>SAVE</p>
 		</div>
-		<div onClick={()=>goToMainMenu()} className='button2'>
-			<p className='button2-text'>BACK TO MAIN MENU</p>
-		</div>
 		{
 			modePrior === 'vps' ? 
 			<div onClick={()=>listVPs()} className="button2">
 				<p className="button2-text">Back to List VPs</p>
 			</div> :
+			modePrior === 'contacts' ?
 			<div onClick={()=>listContacts()} className="button2">
 				<p className="button2-text">Back to List Contacts</p>
-			</div>
+			</div> : null
 		}
+		<div onClick={()=>goToMainMenu()} className='button2'>
+			<p className='button2-text'>BACK TO MAIN MENU</p>
+		</div>
 	</div>
 }

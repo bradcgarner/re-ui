@@ -6,6 +6,7 @@ import {convertIntegersToTimestamp,
 	isPrimitiveNumber, 
 	precisionRound,
 	addTime, 
+	immutableArraySplice,
 	isValidDate,
 } from 'conjunction-junction';
 import { scrollToTop } from 'browser-helpers';
@@ -13,7 +14,7 @@ import { scrollToTop } from 'browser-helpers';
 import { theFields } from './1-fields';
 import { coachContent } from './1-coach-content';
 
-import Landing from "./2-menu";
+import Menu from "./2-menu";
 import Activity from "./6-activity";
 import Contact from './7-contact';
 import Deal from './7-deal';
@@ -24,6 +25,9 @@ import Coach from './99-coach';
 import TableList from './9-table-list';
 import CoreValues from './99-core-values';
 import Income from './8-income';
+import AppParams from './99-app-params';
+import { colorsHash } from './0-colors';
+import VPCategories from './7-vp-categories';
 
 const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
@@ -37,11 +41,12 @@ function App2(props) {
 		optionsHash,
 		dealStatusHash,
 		commissionHash,
-		valueListsHash,
+		vLItemsHash,
+		vLGroupsHash,
 		referralHash,
 		vpReferenceHash,
 		vpReferenceConstant,
-		vpShowReferencesHash,
+		vpShowApplicationHash,
 		vpBinaryHash,
 		dealFoundHash,
 		dealsHash,
@@ -74,6 +79,7 @@ function App2(props) {
 
 	const [contacts, setContacts] = useState([]);
 	const [vps, setVPs] = useState([]);
+	const [vpGroupHash, setVPGroupHash] = useState({});
 	const [contact, setContact] = useState({});
 	const [vpAppStatusHash, setVpAppStatusHash] = useState({});
 	const [contactVPApp, setContactVPApp] = useState({});
@@ -572,7 +578,7 @@ function App2(props) {
 							}
 						}
 					} else if(isADealTimeline){
-						const dealTimelineValueFound = valueListsHash[`${newActivity[one][index][two]}`];
+						const dealTimelineValueFound = vLItemsHash[`${newActivity[one][index][two]}`];
 						if(dealTimelineValueFound && isPrimitiveNumber(dealTimelineValueFound.value)){
 							const today = new Date();
 							const later = addTime(today, dealTimelineValueFound.value * 30, 'days');
@@ -682,6 +688,23 @@ function App2(props) {
 		setActivity(newActivity);
 	};
 
+	const handleActivityVPSelection = (v, i) => {
+		const newA = JSON.parse(JSON.stringify(activity));
+		const contacts = Array.isArray(newA.contacts) ? newA.contacts : [];
+		const thisContact = contacts[i] || {};
+		thisContact.vpTempSelection = v;
+		if(!Array.isArray(thisContact.contact_vp_categories)){
+			thisContact.contact_vp_categories = [];
+		}
+		const index = thisContact.contact_vp_categories.indexOf(v);
+		if(index === -1){
+			thisContact.contact_vp_categories.push(v);
+		} else {
+			thisContact.contact_vp_categories = immutableArraySplice(index, thisContact.contact_vp_categories);
+		}
+		setActivity(newA);
+	};
+
 	const addContactToActivity = connection_record_type => {
 		const newActivity = JSON.parse(JSON.stringify(activity));
 		if(!Array.isArray(newActivity.connections)){
@@ -725,6 +748,162 @@ function App2(props) {
 		setActivity(newActivity);
 	};
 
+	const addFuToActivity = () => {
+		const newActivity = JSON.parse(JSON.stringify(activity));
+		if(!Array.isArray(newActivity.fus)){
+			newActivity.fus = [];
+		}
+		// const index = newActivity.fus.length;
+		const date1 = isObjectLiteral(activity.date_convo) &&
+		  isValidDate(activity.date_convo.date_convo_timestamp) ?
+			activity.date_convo.date_convo_timestamp : new Date();
+		const date2 = addTime(date1, 7, 'days');
+		const date_fu = {
+			date_fu_year: date2.getFullYear(),
+			date_fu_month: date2.getMonth(),
+			date_fu_day: date2.getDate(),
+			dateString: convertTimestampToString(date2,'dow d M y'),
+			date_fu_timestamp: date2,
+		};
+		const newFu = {
+			id_agent: activity.id_agent || id_agent,
+			id_activity_fu: activity.id_activity || null,
+			id_activity_temp: `${activity.id_activity_temp}-X`,
+			id_deal_fu: null,
+			id_deal_fu_temp: '',
+			id_contact_fu: null,
+			id_contact_fu_temp: '',
+			date_fu,
+			fu_purpose: null,
+			fu_notes: '',
+		};
+
+		newActivity.fus.push(newFu);
+		setActivity(newActivity);
+	};
+
+	const processVPReferences = () => {
+		setIsLoading(true);
+
+		const newActivity = JSON.parse(JSON.stringify(activity));
+		if(!Array.isArray(newActivity.connections)){
+			newActivity.connections = [];
+		}
+		if(!Array.isArray(newActivity.contacts)){
+			newActivity.contacts = [];
+		}
+		if(!Array.isArray(newActivity.fus)){
+			newActivity.fus = [];
+		}
+
+		const id_vp_app = contactVPApp.id_vp_app;
+		if(!id_vp_app){
+			console.error('could not find id_vp_app, aborting');
+			return;
+		}
+		const vp = newActivity.contacts[0];
+		if(!vp){
+			console.error('could not find vp, aborting');
+			return;
+		}
+		const id_who_introduced = vp.id_contact;
+		if(!id_who_introduced){
+			console.error('could not find id_who_introduced, aborting');
+			return;
+		}
+
+		const connection_record_type = 'connection';
+
+		// FIRST CONTACT
+		const index1 = newActivity.connections.length + newActivity.contacts.length;
+		const index2 = index1 + 1;
+		const index3 = index2 + 1;
+		const id_contact_temp1 = `${activity.id_activity_temp}-${connection_record_type}-${index1}`;
+		const id_contact_temp2 = `${activity.id_activity_temp}-${connection_record_type}-${index2}`;
+		const id_contact_temp3 = `${activity.id_activity_temp}-${connection_record_type}-${index3}`;
+
+		const newContact = {
+			id_vp_app,
+			id_agent,
+			id_contact: 0,
+			id_who_introduced,
+			id_who_introduced_temp: null,
+			id_activity: activity.id_activity || null,
+			id_activity_temp: `${activity.id_activity_temp}-X`,
+			contact_how_met: 14,
+			contact_where_met: 227,
+			contact_where_met_notes: `Submitted as a reference by ${vp.contact_name_first} ${vp.contact_name_last} of ${vp.contact_company}`,
+			contact_notes: '',
+			contact_name_first: '',
+			contact_name_last: '',
+			contact_phone: '',
+			contact_email: '',
+			contact_vp_categories: null,
+			connection_vp_reference: '',
+			contact_vp_status: 170,
+			connection_type: 159,
+			connection_record_type,
+		};
+		const newContact1 = {
+			...newContact,
+			id_contact_temp: id_contact_temp1,
+			connection_notes: contactVPApp.vp_ref1,
+		};
+		const newContact2 = {
+			...newContact,
+			id_contact_temp: id_contact_temp2,
+			connection_notes: contactVPApp.vp_ref2,
+		};
+		const newContact3 = {
+			...newContact,
+			id_contact_temp: id_contact_temp3,
+			connection_notes: contactVPApp.vp_ref3,
+		};
+
+		const today = new Date();
+		const date2 = addTime(today, 1, 'days');
+		const newFu = {
+			id_agent: activity.id_agent || id_agent,
+			id_activity_fu: activity.id_activity || null,
+			id_activity_temp: `${activity.id_activity_temp}-X`,
+			id_deal_fu: null,
+			id_deal_fu_temp: '',
+			id_contact_fu: null,
+			date_fu: {
+				date_fu_year: date2.getFullYear(),
+				date_fu_month: date2.getMonth(),
+				date_fu_day: date2.getDate(),
+				dateString: convertTimestampToString(date2,'dow d M y'),
+				date_fu_timestamp: date2,
+			},
+			fu_purpose: 34,
+			fu_notes: `Call reference submitted by ${vp.contact_name_first} ${vp.contact_name_last} of ${vp.contact_company}`,
+		};
+		const newFu1 = {
+			...newFu,
+			id_contact_fu_temp: id_contact_temp1,
+		};
+		const newFu2 = {
+			...newFu,
+			id_contact_fu_temp: id_contact_temp2,
+		};
+		const newFu3 = {
+			...newFu,
+			id_contact_fu_temp: id_contact_temp3,
+		};
+
+		newActivity.connections.push(newContact1);
+		newActivity.connections.push(newContact2);
+		newActivity.connections.push(newContact3);
+		newActivity.fus.push(newFu1);
+		newActivity.fus.push(newFu2);
+		newActivity.fus.push(newFu3);
+
+		setActivity(newActivity);
+		setIsLoading(false);
+		
+	};
+
 	const addDealToActivity = () => {
 		const newActivity = JSON.parse(JSON.stringify(activity));
 		if(!Array.isArray(newActivity.deals)){
@@ -759,40 +938,6 @@ function App2(props) {
 			deal_notes: '',
 		};
 		newActivity.deals.push(newDeal);
-		setActivity(newActivity);
-	};
-
-	const addFuToActivity = () => {
-		const newActivity = JSON.parse(JSON.stringify(activity));
-		if(!Array.isArray(newActivity.fus)){
-			newActivity.fus = [];
-		}
-		// const index = newActivity.fus.length;
-		const date1 = isObjectLiteral(activity.date_convo) &&
-		  isValidDate(activity.date_convo.date_convo_timestamp) ?
-			activity.date_convo.date_convo_timestamp : new Date();
-		const date2 = addTime(date1, 7, 'days');
-		const date_fu = {
-			date_fu_year: date2.getFullYear(),
-			date_fu_month: date2.getMonth(),
-			date_fu_day: date2.getDate(),
-			dateString: convertTimestampToString(date2,'dow d M y'),
-			date_fu_timestamp: date2,
-		};
-		const newFu = {
-			id_agent: activity.id_agent || id_agent,
-			id_activity_fu: activity.id_activity || null,
-			id_activity_temp: `${activity.id_activity_temp}-X`,
-			id_deal_fu: null,
-			id_deal_fu_temp: '',
-			id_contact_fu: null,
-			id_contact_fu_temp: '',
-			date_fu,
-			fu_purpose: null,
-			fu_notes: '',
-		};
-
-		newActivity.fus.push(newFu);
 		setActivity(newActivity);
 	};
 
@@ -879,19 +1024,14 @@ function App2(props) {
 			method: 'GET',
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
-		fetch(`${REACT_APP_API_URL}api/contacts/vp-categories`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-groups`, init)
 			.then(res=>{
 				return res.json();
 			})
 			.then(r=>{
-				const vendorPartners = r && Array.isArray(r.vps) ? r.vps : [];
-
-				if(Array.isArray(vendorPartners)){
-					setVPs(vendorPartners);
-					setVpAppStatusHash(r.vpAppStatusHash);
-					setMode('vp-categories');
-					scrollToTop();
-				}
+				setVPGroupHash(r);
+				setMode('vp-categories');
+				scrollToTop();
 				setIsLoading(false);
 			})
 			.catch(err=>{
@@ -949,6 +1089,21 @@ function App2(props) {
 		const newC = JSON.parse(JSON.stringify(contact));
 		newC[k] = valueFormatted;
 		
+		setContact(newC);
+	};
+
+	const handleVPSelection = v => {
+		const newC = JSON.parse(JSON.stringify(contact));
+		newC.vpTempSelection = v;
+		if(!Array.isArray(newC.contact_vp_categories)){
+			newC.contact_vp_categories = [];
+		}
+		const index = newC.contact_vp_categories.indexOf(v);
+		if(index === -1){
+			newC.contact_vp_categories.push(v);
+		} else {
+			newC.contact_vp_categories = immutableArraySplice(index, newC.contact_vp_categories);
+		}
 		setContact(newC);
 	};
 
@@ -1364,27 +1519,34 @@ function App2(props) {
 			});
 	}
 
+	// @@@@@@@@@@@ MISC @@@@@@@@@@@
+
+	const openAppParams = () => {
+		setMode('app params');
+		scrollToTop();
+	}
+
 	// @@@@@@@@@@@ RENDER HELPERS @@@@@@@@@@@
 
 
 	const formatPresetStyle = id => {
-		if(valueListsHash[`${id}`]){
-			const thisItem = valueListsHash[`${id}`];
-			const backgroundColor = thisItem.color || '#cccccc';
-			const color = thisItem.luma <= 170 ? 'white' : '#004B6E';
+		if(vLItemsHash[`${id}`]){
+			const thisItem = vLItemsHash[`${id}`];
+			const backgroundColor = thisItem.color || colorsHash.gray;
+			const color = thisItem.luma <= 170 ? 'white' : colorsHash.dark;
 			return {backgroundColor, color};
 		}
-		return {backgroundColor:'#004B6E',color:'#C5E2F6'};
+		return {backgroundColor:colorsHash.dark,color:colorsHash.good2};
 	};
 
 	const formatStyle = (value, zeroOk) => {
 		if(value === 0 && zeroOk){
-			return {backgroundColor:'#E6F2FF',color:'#004B6E'};
+			return {backgroundColor:colorsHash.good1,color:colorsHash.dark};
 		}
 		if(!value){
-			return {backgroundColor:'#004B6E',color:'#C5E2F6'};
+			return {backgroundColor:colorsHash.dark,color:colorsHash.good2};
 		}
-		return {backgroundColor:'#E6F2FF',color:'#004B6E'};
+		return {backgroundColor:colorsHash.good1,color:colorsHash.dark};
 	};
 
 	// @@@@@@@@@@@ PRE-LOAD @@@@@@@@@@@
@@ -1399,7 +1561,7 @@ function App2(props) {
 	// @@@@@@@@@@@ RENDER @@@@@@@@@@@
 
   return mode === 'menu' ?
-		<Landing
+		<Menu
 			id_agent={id_agent}
 			createNewDailyPlan={createNewDailyPlan}
 			createNewActivity={createNewActivity}
@@ -1415,6 +1577,7 @@ function App2(props) {
 			getMetrics={getMetrics}
 			openCoach={openCoach}
 			openCoreValues={openCoreValues}
+			openAppParams={openAppParams}
 		/> :
 		mode === 'daily-plan' ?
 		<DailyPlan
@@ -1425,8 +1588,9 @@ function App2(props) {
 			handleDailyPlanChange={handleDailyPlanChange}
 			saveDailyPlan={saveDailyPlan}
 			dailyPlan={dailyPlan}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			optionsHash={optionsHash}
+			modePrior={modePrior}
 			proformae={proformae}
 		/> :
 		mode === 'daily-plans' ?
@@ -1435,10 +1599,11 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			coreValues={coreValues}
 			proformae={proformae}
 			mode={mode}
+			modePrior={modePrior}
 			openItem={openDailyPlan}
 			openKey={'id_dp'}
 			header='DAILY PLANS'
@@ -1448,6 +1613,8 @@ function App2(props) {
 		mode === 'activity' ?
 		<Activity
 			handleActivityChange={handleActivityChange}
+			handleActivityVPSelection={handleActivityVPSelection}
+			processVPReferences={processVPReferences}
 			saveActivity={saveActivity}
 			addContactToActivity={addContactToActivity}
 			addFuToActivity={addFuToActivity}
@@ -1466,11 +1633,11 @@ function App2(props) {
 			activity={activity}
 			optionsHash={optionsHash}
 			dealStatusHash={dealStatusHash}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			referralHash={referralHash}
 			vpReferenceHash={vpReferenceHash}
 			vpBinaryHash={vpBinaryHash}
-			vpShowReferencesHash={vpShowReferencesHash}
+			vpShowApplicationHash={vpShowApplicationHash}
 			problemSolveHash={problemSolveHash}
 			newContactOptions={newContactOptions}
 			newDealOptions={newDealOptions}
@@ -1481,8 +1648,9 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			mode={mode}
+			modePrior={modePrior}
 			openItem={openActivity}
 			openKey={'id_activity'}
 			header='ACTIVITIES'
@@ -1495,8 +1663,9 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			mode={mode}
+			modePrior={modePrior}
 			openItem={openActivity}
 			openKey={'id_activity'}
 			header='FOLLOW-UPS'
@@ -1509,8 +1678,9 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			mode={mode}
+			modePrior={modePrior}
 			openItem={openContact}
 			openKey={'id_contact'}
 			header='CONTACTS'
@@ -1523,28 +1693,31 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			vpAppStatusHash={vpAppStatusHash}
 			mode={mode}
+			modePrior={modePrior}
 			openItem={openContact}
+			listVPCategories={listVPCategories}
 			openKey={'id_contact'}
 			header='VENDOR PARTNERS'
 			items={vps}
 			theFields={theFields.vps}
 		/> :
 		mode === 'vp-categories' ?
-		<TableList 
+		<VPCategories 
 			screenType={screenType}
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
+			vpAppStatusHash={vpAppStatusHash}
 			mode={mode}
-			openItem={openContact}
+			modePrior={modePrior}
+			openContact={openContact}
+			listVPs={listVPs}
 			openKey={'id_contact'}
-			header='VENDOR PARTNER CATEGORIES'
-			items={contacts}
-			theFields={theFields.contacts}
+			vpGroupHash={vpGroupHash}
 		/> :
 		mode === 'contact' ?
 		<Contact
@@ -1555,6 +1728,7 @@ function App2(props) {
 			formatStyle={formatStyle}
 			saveContact={saveContact}
 			handleContactChange={handleContactChange}
+			handleVPSelection={handleVPSelection}
 			openDeal={openDeal}
 			openActivity={openActivity}
 			initiateVPApplication={initiateVPApplication}
@@ -1564,7 +1738,7 @@ function App2(props) {
 			reOpenVPAppForEditing={reOpenVPAppForEditing}
 			declineVPApp={declineVPApp}
 			contact={contact}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			vpBinaryHash={vpBinaryHash}
 			referralHash={referralHash}
 			optionsHash={optionsHash}
@@ -1577,8 +1751,9 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			mode={mode}
+			modePrior={modePrior}
 			openItem={openDeal}
 			openKey='id_deal'
 			header='DEALS'
@@ -1597,7 +1772,7 @@ function App2(props) {
 			openActivity={openActivity}
 			deal={deal}
 			vpBinaryHash={vpBinaryHash}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			optionsHash={optionsHash}
 			modePrior={modePrior}
 			referralHash={referralHash}
@@ -1605,12 +1780,13 @@ function App2(props) {
 		mode === 'proformae' ?
 		<Proformae
 			goToMainMenu={goToMainMenu}
-			valueListsHash={valueListsHash}
+			vLItemsHash={vLItemsHash}
 			proformae={proformae}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
 			handleProformaeChange={handleProformaeChange}
 			optionsHash={optionsHash}
+			modePrior={modePrior}
 			saveProformae={saveProformae}
 		/> :
 		mode === 'incomeGraph' ?
@@ -1635,6 +1811,12 @@ function App2(props) {
 		<CoreValues
 			goToMainMenu={goToMainMenu}
 			coreValues={coreValues}
+		/> :
+		mode === 'app params' ?
+		<AppParams
+			goToMainMenu={goToMainMenu}
+			vLGroupsHash={vLGroupsHash}
+			formatPresetStyle={formatPresetStyle}
 		/> :
 		<h1>Nothing To Load</h1>
 }

@@ -3,20 +3,22 @@ import { precisionRound,
   // convertTimestampToString,
 isPrimitiveNumber } from 'conjunction-junction';
 import Instructions from './999-instructions';
+import { colorsHash } from './0-colors';
 
 export default function DailyPlan(props) {
 
 	const {
 		goToMainMenu,
 		listDailyPlans,
-		// valueListsHash,
+		// vLItemsHash,
 		dailyPlan,
 		formatPresetStyle,
 		formatStyle,
 		handleDailyPlanChange,
 		optionsHash,
 		saveDailyPlan,
-		proformae
+		proformae,
+		modePrior,
 	} = props;
 
 	const dateDailyPlan = dailyPlan.date_dp || {};
@@ -37,8 +39,8 @@ export default function DailyPlan(props) {
 		convosMonthlyDone: 6,	
 	};
 
-	const colorDone = '#2193c9';
-	const colorNot = '#e6f2ff';
+	const colorDone = colorsHash.good7;
+	const colorNot = colorsHash.good1;
 
 	const weeklyFoundPct = Math.min(precisionRound(
 		quickStats.dealsWeeklyFound/quickStats.dealsWeeklyNeeded, 2) * 100, 100);
@@ -382,6 +384,14 @@ export default function DailyPlan(props) {
 		<div onClick={()=>saveDailyPlan()} className='button2'>
 			<p className='button2-text'>SAVE</p>
 		</div>
+		{
+			modePrior === 'daily-plans' ?
+			<div onClick={()=>listDailyPlans()} className='button2'>
+				<p className='button2-text'>Back to List Daily Plans</p>
+			</div> : 
+			null 
+		}
+
 		<div onClick={()=>goToMainMenu()} className='button2'>
 			<p className='button2-text'>BACK TO MAIN MENU</p>
 		</div>

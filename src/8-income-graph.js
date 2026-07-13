@@ -1,13 +1,13 @@
 import { isPrimitiveNumber,
-	precisionRound, 
-	numberWithCommas } from "conjunction-junction";
+	precisionRound } from "conjunction-junction";
+import { colorsHash } from "./0-colors";
 
 export default function IncomeGraph(props) {
 
 	const incomeData = props.incomeData || {};
 	const dealStageHash = incomeData.dealStageHash || {};
-	const divisors = incomeData.divisors || {};
-	const pf_income_gci_pct = divisors.pf_income_gci_pct || 0;
+	// const divisors = incomeData.divisors || {};
+	// const pf_income_gci_pct = divisors.pf_income_gci_pct || 0;
 
 	const dealGroups = Array.isArray(incomeData.dealGroups) ? incomeData.dealGroups : [] ;
 
@@ -43,9 +43,9 @@ export default function IncomeGraph(props) {
 					const cont = isPrimitiveNumber(s[`${contId}`]) ? s[`${contId}`] : 0 ;
 					const pros = isPrimitiveNumber(s[`${prosId}`]) ? s[`${prosId}`] : 0 ;
 					
-					const opps = isPrimitiveNumber(s[`${oppsId}`]) ? s[`${oppsId}`] : 0 ;
-					const dead = isPrimitiveNumber(s[`${deadId}`]) ? s[`${deadId}`] : 0 ;
-					const lost = isPrimitiveNumber(s[`${lostId}`]) ? s[`${lostId}`] : 0 ;
+					// const opps = isPrimitiveNumber(s[`${oppsId}`]) ? s[`${oppsId}`] : 0 ;
+					// const dead = isPrimitiveNumber(s[`${deadId}`]) ? s[`${deadId}`] : 0 ;
+					// const lost = isPrimitiveNumber(s[`${lostId}`]) ? s[`${lostId}`] : 0 ;
 					
 					const max  = precisionRound((ucon + sign + oppl + oppn + cont + pros),0);
 					const maxH = precisionRound(max/200,0);
@@ -57,9 +57,9 @@ export default function IncomeGraph(props) {
 					const contH = precisionRound(cont/200, 0);
 					const prosH = precisionRound(pros/200, 0);
 					
-					const oppsH = precisionRound(opps/200, 0);
-					const deadH = precisionRound(dead/200, 0);
-					const lostH = precisionRound(lost/200, 0);
+					// const oppsH = precisionRound(opps/200, 0);
+					// const deadH = precisionRound(dead/200, 0);
+					// const lostH = precisionRound(lost/200, 0);
 					
 					const prosY = y0 - maxH; // pros
 					const contY = prosY + prosH; // cont
@@ -92,13 +92,13 @@ export default function IncomeGraph(props) {
 					text-anchor: middle;
 				}
 				.text-dark {
-					fill: #0083C0;				
+					fill: ${colorsHash.good8};		
 				}
 				.text-lite {
-					fill: #A4D2ED;				
+					fill: ${colorsHash.good3};				
 				}
 				.shape {
-					stroke: #0083C0;
+					stroke: ${colorsHash.good8};
 					stroke-opacity: 30%;
 					}
 				.ucon {

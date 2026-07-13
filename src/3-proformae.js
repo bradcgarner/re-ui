@@ -7,7 +7,7 @@ export default function Proformae(props) {
 
 	const {
 		goToMainMenu,
-		// valueListsHash,
+		// vLItemsHash,
 		proformae,
 		// formatPresetStyle,
 		formatStyle,

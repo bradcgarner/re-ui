@@ -33,7 +33,7 @@ function App() {
 	const vpReferenceHash = {
 		'159': 14, // VP Reference
 	};
-	const vpShowReferencesHash = {
+	const vpShowApplicationHash = {
 		'29': true, // vp get on list
 		'31': true, // vp follow-up
 	}
@@ -168,7 +168,8 @@ function App() {
 	const [id_agent] = useState(parseInt(localStorage.id_agent, 10)); // update based on login
 
 	const [hasLoaded, setHasLoaded] = useState(false);
-	const [valueListsHash, setValueListsHash] = useState({});
+	const [vLGroupsHash, setVLGroupsHash] = useState([]);
+	const [vLItemsHash, setVLItemsHash] = useState({});
 	const [optionsHash, setOptionsHash] = useState({});
 	const [contactsHash, setContactsHash] = useState({});
 	const [dealsHash, setDealsHash] = useState({});
@@ -177,27 +178,37 @@ function App() {
 
 	const formatAndSetLists = content => {
 		const {
-			// proformae,
-			valueListHash,
-			fullHash, 
+			vpCategories,
+			proformae,
+			vLGroupsHash,
+			vLItemsHash, 
 			contactsHash, 
 			dealsHash} = content;
+
+		const vpCategoryOptions = [<option key={-1} value={-1}>ADD OR REMOVE VP CATEGORY</option>]
+		if(Array.isArray(vpCategories)){
+			vpCategories.forEach((c,i)=>{
+				vpCategoryOptions.push(<option key={i} value={c.vp_category}>{c.vp_category}</option>)
+			});
+		}
+
 		const newListsHash = {
 			// contacts: contactsOptions,
-			// deals: dealsOptions,
+			vpCategories: vpCategoryOptions,
 			months: monthOptions,
 		};
-		for(let k in valueListHash){
+		for(let k in vLGroupsHash){
 			newListsHash[k] = [<option key={-1} value={-1}>SELECT {k.toUpperCase()}</option>];
-			for(let o in valueListHash[k]){
-				const thisO = valueListHash[k][o];
+			for(let o in vLGroupsHash[k]){
+				const thisO = vLGroupsHash[k][o];
 				newListsHash[k].push(<option key={thisO.id} value={thisO.id}>{thisO.label}</option>)
 			}
 		}
-		setProformae(content.proformae);
+		setProformae(proformae);
 		setContactsHash(contactsHash);
 		setDealsHash(dealsHash);
-		setValueListsHash(fullHash);
+		setVLItemsHash(vLItemsHash);
+		setVLGroupsHash(vLGroupsHash);
 		setOptionsHash(newListsHash);
 	};
 
@@ -220,6 +231,7 @@ function App() {
 					console.error(err);
 				});
 		}
+	// eslint-disable-next-line
 	}, [hasLoaded]);
 
 
@@ -319,13 +331,14 @@ function App() {
 			  inputFormatOptions={inputFormatOptions}
 				tempIdKeys={tempIdKeys}
 				optionsHash={optionsHash}
-				valueListsHash={valueListsHash}
+				vLItemsHash={vLItemsHash}
+				vLGroupsHash={vLGroupsHash}
 				dealStatusHash={dealStatusHash}
 				commissionHash={commissionHash}
 				referralHash={referralHash}
 				vpReferenceHash={vpReferenceHash}
 				vpReferenceConstant={vpReferenceConstant}
-				vpShowReferencesHash={vpShowReferencesHash}
+				vpShowApplicationHash={vpShowApplicationHash}
 				vpBinaryHash={vpBinaryHash}
 				dealFoundHash={dealFoundHash}
 				convoTypeHash={convoTypeHash}

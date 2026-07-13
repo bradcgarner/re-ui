@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { isObjectLiteral, 
 	isPrimitiveNumber,
-numberWithCommas } from 'conjunction-junction';
+	numberWithCommas } from 'conjunction-junction';
 import Instructions from './999-instructions';
 import DevNotes from './999-dev-notes';
-import Reminder from './999-reminder';
+// import Reminder from './999-reminder';
 
 export default function Activity(props) {
 
@@ -12,6 +12,7 @@ export default function Activity(props) {
 		listActivities,
 		listFus,
 		handleActivityChange,
+		handleActivityVPSelection,
 		saveActivity,
 		addContactToActivity,
 		addFuToActivity,
@@ -20,12 +21,12 @@ export default function Activity(props) {
 		activity,
 		optionsHash,
 		dealStatusHash,
-		// valueListsHash, 
+		// vLItemsHash, 
 		referralHash,
 		vpReferenceHash,
 		vpBinaryHash,
-		vpShowReferencesHash,
-		problemSolveHash,
+		vpShowApplicationHash,
+		// problemSolveHash,
 		newContactOptions,
 		getContactVPApp,
 		contactVPApp,
@@ -36,6 +37,7 @@ export default function Activity(props) {
 		openDeal,
 		openContact,
 		openActivity,
+		processVPReferences,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);
@@ -51,7 +53,7 @@ export default function Activity(props) {
 
 	const dealLinkButtonStatus = dealStatusHash[activity.convo_deal_found];
 
-	const vpShowReferences = vpShowReferencesHash[`${activity.convo_main_purpose}`];
+	const vpShowApplication = vpShowApplicationHash[`${activity.convo_main_purpose}`];
 	const contactVPAppIsLoaded = !!contactVPApp.id_contact;
 	const firstContact = contacts[0] || {};
 	const firstContactId = firstContact.id_contact;
@@ -104,9 +106,10 @@ export default function Activity(props) {
 			<div onClick={()=>listActivities()} className="button2">
 				<p className="button2-text">Back to Activities List</p>
 			</div> :
+			modePrior === 'follow-ups' ?
 			<div onClick={()=>listFus()} className="button2">
 				<p className="button2-text">Back to Follow-Up List</p>
-			</div>
+			</div> : null
 		}
 
 		<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
@@ -296,6 +299,13 @@ export default function Activity(props) {
 							onChange={e=>handleActivityChange('contacts',i,'contact_where_met_notes',null, e.target.value)}/>
 					</label>
 					<label className='label3'>
+						Notes (sticks with contact)
+						<textarea className='input3'
+							value={c.contact_notes || ''}
+							style={formatStyle(c.contact_notes)}
+							onChange={e=>handleActivityChange('contacts',i,'contact_notes',null, e.target.value)}/>
+					</label>
+					<label className='label3'>
 						Is A Vendor Partner
 						<select className='input3'
 							value={c.contact_vp_status || ''}
@@ -307,20 +317,23 @@ export default function Activity(props) {
 					{
 						isAVP ?
 							<label className='label3'>
-								Vendor Partner Categories (separate using commas)
-								<textarea className='input3'
-									value={c.contact_vp_categories || ''}
-									style={formatStyle(c.contact_vp_categories)}
-									onChange={e=>handleActivityChange('contacts',i,'contact_vp_categories',null, e.target.value)}/>
+								Vendor Partner Categories
+								<div className='vp-categories-container-3'>
+								{
+									Array.isArray(c.contact_vp_categories) ?
+									c.contact_vp_categories.map((c,j)=>{
+										return <p key={j} className='vp-category'
+											onClick={()=>handleActivityVPSelection(c,i)}>{c}</p>
+									}): null
+								}
+								</div>
+								<select className='input3'
+									value={c.vpTempSelection || ''}
+									onChange={e=>handleActivityVPSelection(e.target.value,i)}>
+										{optionsHash.vpCategories}
+								</select>
 							</label> : null
 					}
-					<label className='label3'>
-						Notes (sticks with contact)
-						<textarea className='input3'
-							value={c.contact_notes || ''}
-							style={formatStyle(c.contact_notes)}
-							onChange={e=>handleActivityChange('contacts',i,'contact_notes',null, e.target.value)}/>
-					</label>
 
 					<Instructions show={showInstructions}
 						text={`Enter any notes that you'll want to put into your contacts, such as Google Contacts or Outlook, if you use those.`}/>
@@ -462,14 +475,14 @@ export default function Activity(props) {
 		<div className='divider'/>
 
 		{
-			vpShowReferences ?
+			vpShowApplication ?
 			<div className='g1'>
 				<h3 className='h2'>VP APPLICATION</h3>
 
 					{
 						!contactVPAppIsLoaded ?
-						<div onClick={()=>getContactVPApp(firstContactId)} className='button4 button4'>
-							<p className='button4-text'>
+						<div onClick={()=>getContactVPApp(firstContactId)} className='button2'>
+							<p className='button2-text'>
 								Load VP App for {firstContactName}
 							</p>
 						</div> : 
@@ -483,49 +496,57 @@ export default function Activity(props) {
 							<label className='label3 label-white'>
 								Business Name
 								<input className='input3'
-									value={contactVPApp.vp_name_business || ''}/>
+									value={contactVPApp.vp_name_business || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								What type of business are you? (plumber, roofer, electrician, restaurant, etc)
 								<textarea className='input3'
-									value={contactVPApp.vp_type || ''}/>
+									value={contactVPApp.vp_type || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								Best Contact Person
 								<input className='input3'
-									value={contactVPApp.vp_contact_person || ''}/>
+									value={contactVPApp.vp_contact_person || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								Business Phone Number
 								<input className='input3'
-									value={contactVPApp.vp_phone || ''}/>
+									value={contactVPApp.vp_phone || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								Business Email
 								<input className='input3'
-									value={contactVPApp.vp_email || ''}/>
+									value={contactVPApp.vp_email || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								Website
 								<input className='input3'
-									value={contactVPApp.vp_url || ''}/>
+									value={contactVPApp.vp_url || ''}
+									readOnly/>
 							</label>
 
 							<label className='label3 label-white'>
 								What is your service area? We only want to refer you to customers in areas you service.	
 								<textarea className='edit-input edit-textarea edit-input-wide-nest'
-									value={contactVPApp.vp_area || ''}/>
+									value={contactVPApp.vp_area || ''}
+									readOnly/>
 							</label>
 
 							<label className='label3 label-white'>
 								Best URL/link we can send our clients to leave you an online review (Google, Yelp, Facebook, etc.)
 								<input className='input3'
-									value={contactVPApp.vp_review_url || ''}/>
+									value={contactVPApp.vp_review_url || ''}
+									readOnly/>
 							</label>
 
 							<div className='divider'/>
@@ -533,7 +554,8 @@ export default function Activity(props) {
 							<label className='label3 label-white'>
 								Do you agree to provide three past customers so we can place that 2 minute call and maintain integrity for our list?
 								<select className='input3'
-									value={contactVPApp.vp_agree || ''}>
+									value={contactVPApp.vp_agree || ''}
+									readOnly >
 										<option key={-1} value={' '}>{' '}</option>
 										<option key={0} value={'Yes'}>{'Yes'}</option>
 										<option key={1} value={'No'}>{'No'}</option>
@@ -543,21 +565,32 @@ export default function Activity(props) {
 							<label className='label3 label-white'>
 								First Past Client We Can Contact For A Testimonial (Name & Phone Number)				
 								<textarea className='edit-input edit-textarea edit-input-wide-nest'
-									value={contactVPApp.vp_ref1 || ''}/>
+									value={contactVPApp.vp_ref1 || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								Second Past Client We Can Contact For A Testimonial (Name & Phone Number)				
 								<textarea className='edit-input edit-textarea edit-input-wide-nest'
-									value={contactVPApp.vp_ref2 || ''}/>
+									value={contactVPApp.vp_ref2 || ''}
+									readOnly />
 							</label>
 
 							<label className='label3 label-white'>
 								Third Past Client We Can Contact For A Testimonial (Name & Phone Number)				
 								<textarea className='edit-input edit-textarea edit-input-wide-nest'
-									value={contactVPApp.vp_ref3 || ''}/>
+									value={contactVPApp.vp_ref3 || ''}
+									readOnly />
 							</label>
 						</div>
+					}
+					{
+						contactVPAppIsLoaded ?
+							<div onClick={()=>processVPReferences(firstContactId)} className='button2'>
+								<p className='button4-text'>
+									Create Connections and Follow-Ups For All 3 VP References
+								</p>
+						</div> : null
 					}
 				<div className='divider'/>
 			</div> : null 
@@ -872,7 +905,7 @@ export default function Activity(props) {
 										}
 										<select className={!c.id_who_introduced ? 'input5B' : 'input3'}
 											value={c.id_who_introduced || ''}
-											style={formatPresetStyle(c.id_who_introduced)}
+											style={formatStyle(c.id_who_introduced)}
 											onChange={e=>handleActivityChange('connections',i, 'id_who_introduced',null, e.target.value)}>
 												{c.id_who_introduced ? optionsHash.contact : contactOptions}
 										</select>
@@ -928,11 +961,11 @@ export default function Activity(props) {
 					{
 						isAVP ?
 							<label className='label3'>
-								Vendor Partner Categories (separate using commas)
+								Vendor Partner Categories
 								<textarea className='input3'
 									value={c.contact_vp_categories || ''}
 									style={formatStyle(c.contact_vp_categories)}
-									onChange={e=>handleActivityChange('connections',i,'contact_vp_categories',null, e.target.value)}/>
+									readOnly />
 							</label> : null
 					}
 					{
@@ -1102,18 +1135,19 @@ export default function Activity(props) {
 		<div onClick={()=>saveActivity()} className='button2'>
 			<p className='button2-text'>SAVE</p>
 		</div>
-		<div onClick={()=>goToMainMenu()} className='button2'>
-			<p className='button2-text'>BACK TO MAIN MENU</p>
-		</div>
 		{
 			modePrior === 'activities' ?
 			<div onClick={()=>listActivities()} className="button2">
 				<p className="button2-text">Back to Activities List</p>
 			</div> :
+			modePrior === 'fus' ?
 			<div onClick={()=>listFus()} className="button2">
 				<p className="button2-text">Back to Follow-Up List</p>
-			</div>
+			</div> : null
 		}
+		<div onClick={()=>goToMainMenu()} className='button2'>
+			<p className='button2-text'>BACK TO MAIN MENU</p>
+		</div>
 
 		<Instructions show={showInstructions}
 			text={`You may save at any point AFTER you enter at least one contact and a date. After saving, you remain on this screen until you click "BACK TO MAIN MENU". If you leave this page, you may return to the page and continue editing after you save. This page does not save real-time.`}/>

@@ -6,6 +6,7 @@ import {
 	isPrimitiveNumber
  } from 'conjunction-junction';
 import { calcMinimumWindowDimensions } from 'browser-helpers';
+import { colorsHash } from './0-colors';
 
 export default function TableList(props) {
 
@@ -14,23 +15,28 @@ export default function TableList(props) {
 		openItem,
 		openKey,
 		items,
-		valueListsHash,
+		vLItemsHash,
 		vpAppStatusHash,
 		coreValues,
 		formatPresetStyle,
+		listVPCategories,
 		formatStyle,
 		theFields,
 		header,
+		modePrior,
+		mode,
 	} = props;
+
+	const _listVPCategories = typeof listVPCategories === 'function' ? listVPCategories : ()=>{};
 
 	const formatVpAppStatusStyle = id => {
 		if(vpAppStatusHash[`${id}`]){
 			const thisItem = vpAppStatusHash[`${id}`];
-			const backgroundColor = thisItem.color || '#cccccc';
-			const color = thisItem.luma <= 170 ? 'white' : '#004B6E';
+			const backgroundColor = thisItem.color || colorsHash.gray;
+			const color = thisItem.luma <= 170 ? 'white' : colorsHash.dark;
 			return {backgroundColor, color};
 		}
-		return {backgroundColor:'#004B6E',color:'#C5E2F6'};
+		return {backgroundColor:colorsHash.dark, color:colorsHash.good2};
 	};
 
 	const dims = calcMinimumWindowDimensions(window);
@@ -52,7 +58,7 @@ export default function TableList(props) {
 		return convertTimestampToString(d, 'dow d M y')
 	};
 	const getValueListValue = v => {
-		const vl = valueListsHash[`${v}`] || {};
+		const vl = vLItemsHash[`${v}`] || {};
 		return vl.label || v;
 	};
 	const getCoreValueListValue = v => {
@@ -77,13 +83,19 @@ export default function TableList(props) {
 		<div onClick={()=>goToMainMenu()} className='button2'>
 			<p className='button2-text'>BACK TO MAIN MENU</p>
 		</div>
+		{
+			modePrior === 'vp-categories' || mode === 'vps' ?
+				<div onClick={()=>_listVPCategories()} className='button2'>
+					<p className='button2-text'>Back To List VP Categories</p>
+				</div> : null
+		}
 
 		<table>
 			<thead>
 				<tr className='table-list-thr'>
 					{
 						fields.map((f,i)=>{
-							return <th key={i} className='table-list-th'>{f.label || f.fieldName}</th>
+							return <th key={i} className={`table-list-th table-column-${f.fieldName}`}>{f.label || f.fieldName}</th>
 						})
 					}
 				</tr>
@@ -108,7 +120,7 @@ export default function TableList(props) {
 										f.fd === 'vl' ? formatPresetStyle : 
 										f.fd === 'vp' ? formatVpAppStatusStyle :
 										formatStyle;
-									return <td key={i} className='table-list-td' style={fs(value)}>{fd}</td>
+									return <td key={i} className={`table-list-td table-column-${f.fieldName}`} style={fs(value)}>{fd}</td>
 								})
 							}
 						</tr>

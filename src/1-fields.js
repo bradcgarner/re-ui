@@ -38,6 +38,7 @@ export const theFields = {
 		{
 			fieldName: 'dp_future_self', 
 			label: 'future self', 
+			limit: 50,
 		},
 		{
 			fieldName: 'dp_convo_enter', 
@@ -81,25 +82,30 @@ export const theFields = {
 		},
 		{
 			fieldName: 'dp_vp_seeking', 
+			limit: 50,
 			label: 'VP seeking', 
 		},
 		{
 			fieldName: 'dp_talk_plan', 
 			label: 'talk plan', 
+			limit: 50,
 			fd: 'vl'
 		},
 		{
 			fieldName: 'dp_svc_priority', 
+			limit: 50,
 			label: 'service priority', 
 		},
 		{
 			fieldName: 'dp_stabilize_plan', 
 			label: 'stabilization plan', 
-			fd: 'vl'
+			fd: 'vl',
+			limit: 50,
 		},
 		{
 			fieldName: 'dp_white_space', 
 			label: 'white space', 
+			limit: 50,
 		},
 		{
 			fieldName: 'id_agent', 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import App from "./1-app";
 import './0-app.css';
 import Loading from "./1-loading";
+import { colorsHash } from "./0-colors";
 
 const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
@@ -120,7 +121,7 @@ useEffect(()=> {
 	const w3 = w2 - (m1*2);
 	const wd = 120;
 	const w4 = w3 - (m1*2);
-	const w5 = w4 - (m1*2);
+	// const w5 = w4 - (m1*2);
 	const wC1 = 40; // first letter to find contact
 	const wC2 = 330;// contact if first letter showing
 	const wCy = 250 // city
@@ -130,93 +131,99 @@ useEffect(()=> {
 	return <div className='the-app'>
 	 { loginMode === 'reset' ?
 
-		<div className="g2">
-			{pageTop}
-			<label className='label3'>
-				Email
-				<input className='input3'
-					value={agent.agent_email || ''}
-					onChange={e=>handleAgentChange('agent_email', e.target.value)}/>
-			</label>
-			<p>&nbsp;</p>
-			<p>&nbsp;</p>
-			<div onClick={()=>resetPw()} className='button2'>
-				<p className='button2-text'>RESET PASSWORD</p>
-			</div> 
-			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('login')} className='button4'>
-				<p className='button4-text'>Log In</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('about')} className='button4'>
-				<p className='button4-text'>About</p>
-			</div>
-			{loading}
-		</div> :
+			<div className="g0">
+				<div className="g2">
+					{pageTop}
+					<label className='label3'>
+						Email
+						<input className='input3'
+							value={agent.agent_email || ''}
+							onChange={e=>handleAgentChange('agent_email', e.target.value)}/>
+					</label>
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+					<div onClick={()=>resetPw()} className='button2'>
+						<p className='button2-text'>RESET PASSWORD</p>
+					</div> 
+					<p>&nbsp;</p>
+					<div onClick={()=>setLoginMode('login')} className='button4'>
+						<p className='button4-text'>Log In</p>
+					</div>
+					<p>&nbsp;</p>
+					<div onClick={()=>setLoginMode('about')} className='button4'>
+						<p className='button4-text'>About</p>
+					</div>
+					{loading}	
+				</div>
+			</div> :
 
 		loginMode === 'done' ?
 		<App/> :
 
 		loginMode === 'about' ?
 
-		<div className="g2">
-			{pageTop}
-			<p className="about-p">Simply Real is a tool to help Realtors{r} manage relationships and their business.</p>
-			<p className="about-p">This tool is built around the concept that human relationships are the most important aspect of real estate.</p>
-			<p className="about-p">Simply Real is not for every Realtor{r}. It is only for Realtors{r} who choose to place community, relationships, and long-term connections first.</p>
-			
-			<div className="divider"/>
-			<p className="about-p">Simply Real is a tool to accompany methods taught by Danielle Mapes in The Real Estate Prescription.</p>
-			
-			<div className="divider"/>
-			<p className="about-p">Apps are tools for handling business processes. This app assists Realtors{r} who follow a business process like this:</p>
-			<ul>
-				<li className='about-li'>Setting clear goals is critical. Goals must be designed to point you to "somewhere very specific" in your life, and in your business.</li>
-				<li className='about-li'>Daily planning is critical. Start each day with a clear and realistic mission. Knock out that to-do list, but never be at a loss for productive activities, because you have a ton of back-up plan ideas in this app.</li>
-				<li className='about-li'>Conversations are the most important aspect of our business and our day. Real estate is all about navigating people through home ownership. Around 97% of the time, that means holding and maintaining and living in a home. Around 3% of the time that means buying or selling a home. Conversations are the way we connect with people to know who, how, and when to help.</li>
-				<li className='about-li'>Conversations are not accidental. You know how to handle conversations because you have guides in this app.</li>
-				<li className='about-li'>Track those conversations! Understand what worked. Understand what didn't. Recap those conversations and re-adjust to hone your skills.</li>
-				<li className='about-li'>Be a super-organized home and lifestyle expert! Because around 97% of your customers are not actively buying or selling a home, your service to them 97% of the time will be connecting them with the best of the best of local businesses. When they need help, they might need it fast. When they move into that 3% of active home buyers or sellers, they need it REALLY FAST! So be prepared.</li>
-			</ul>
-			<div className="divider"/>
-			<p className="about-p">Plan, Recap, Track, Talk</p>
-			<p className="about-p">Real estate really can be that simple.</p>
-			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('login')} className='button4'>
-				<p className='button4-text'>Log In</p>
+		<div className="g0">
+			<div className="g2">
+				{pageTop}
+				<p className="about-p">Simply Real is a tool to help Realtors{r} manage relationships and their business.</p>
+				<p className="about-p">This tool is built around the concept that human relationships are the most important aspect of real estate.</p>
+				<p className="about-p">Simply Real is not for every Realtor{r}. It is only for Realtors{r} who choose to place community, relationships, and long-term connections first.</p>
+				
+				<div className="divider"/>
+				<p className="about-p">Simply Real is a tool to accompany methods taught by Danielle Mapes in The Real Estate Prescription.</p>
+				
+				<div className="divider"/>
+				<p className="about-p">Apps are tools for handling business processes. This app assists Realtors{r} who follow a business process like this:</p>
+				<ul>
+					<li className='about-li'>Setting clear goals is critical. Goals must be designed to point you to "somewhere very specific" in your life, and in your business.</li>
+					<li className='about-li'>Daily planning is critical. Start each day with a clear and realistic mission. Knock out that to-do list, but never be at a loss for productive activities, because you have a ton of back-up plan ideas in this app.</li>
+					<li className='about-li'>Conversations are the most important aspect of our business and our day. Real estate is all about navigating people through home ownership. Around 97% of the time, that means holding and maintaining and living in a home. Around 3% of the time that means buying or selling a home. Conversations are the way we connect with people to know who, how, and when to help.</li>
+					<li className='about-li'>Conversations are not accidental. You know how to handle conversations because you have guides in this app.</li>
+					<li className='about-li'>Track those conversations! Understand what worked. Understand what didn't. Recap those conversations and re-adjust to hone your skills.</li>
+					<li className='about-li'>Be a super-organized home and lifestyle expert! Because around 97% of your customers are not actively buying or selling a home, your service to them 97% of the time will be connecting them with the best of the best of local businesses. When they need help, they might need it fast. When they move into that 3% of active home buyers or sellers, they need it REALLY FAST! So be prepared.</li>
+				</ul>
+				<div className="divider"/>
+				<p className="about-p">Plan, Recap, Track, Talk</p>
+				<p className="about-p">Real estate really can be that simple.</p>
+				<p>&nbsp;</p>
+				<div onClick={()=>setLoginMode('login')} className='button4'>
+					<p className='button4-text'>Log In</p>
+				</div>
+				{loading}
 			</div>
-			{loading}
 		</div> :
 
-		<div className="g2">
-			{pageTop}
-			<label className='label3'>
-				Email
-				<input className='input3'
-					value={agent.agent_email || ''}
-					onChange={e=>handleAgentChange('agent_email', e.target.value)}/>
-			</label>
-			<label className='label3'>
-				Password
-				<input className='input3'
-					value={agent.agent_password || ''}
-					onChange={e=>handleAgentChange('agent_password', e.target.value)}/>
-			</label>
-			<p>&nbsp;</p>
-			<p>&nbsp;</p>
-			<div onClick={()=>logIn()} className='button2'>
-				<p className='button2-text'>LOG IN</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('reset')} className='button4'>
-				<p className='button4-text'>Reset Password</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setLoginMode('about')} className='button4'>
-				<p className='button4-text'>About</p>
-			</div>
-			{loading}
-		</div> 
+		<div className="g0">
+			<div className="g2">
+				{pageTop}
+				<label className='label3'>
+					Email
+					<input className='input3'
+						value={agent.agent_email || ''}
+						onChange={e=>handleAgentChange('agent_email', e.target.value)}/>
+				</label>
+				<label className='label3'>
+					Password
+					<input className='input3'
+						value={agent.agent_password || ''}
+						onChange={e=>handleAgentChange('agent_password', e.target.value)}/>
+				</label>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<div onClick={()=>logIn()} className='button2'>
+					<p className='button2-text'>LOG IN</p>
+				</div>
+				<p>&nbsp;</p>
+				<div onClick={()=>setLoginMode('reset')} className='button4'>
+					<p className='button4-text'>Reset Password</p>
+				</div>
+				<p>&nbsp;</p>
+				<div onClick={()=>setLoginMode('about')} className='button4'>
+					<p className='button4-text'>About</p>
+				</div>
+				{loading}
+			</div> 
+		</div>
 		}
 		<style>{`
 					
@@ -240,27 +247,27 @@ useEffect(()=> {
 				margin-bottom: 1vh;
 			}
 			.g2-multi {
-				border: 1px solid #C5E2F6;
+				border: 1px solid ${colorsHash.good2};
 				border-radius: 10px;
 				padding: 10px;
 			}
 			.g2-deal {
-				background-color: #e4f2fb;
+				background-color: ${colorsHash.lt_blue};
 			}
 			.g2-fu {
-				background-color: #f9f7f6;
+				background-color: ${colorsHash.lt_tan};
 			}
 			.g2-contact {
-				background-color: #f4f4f4;
+				background-color: ${colorsHash.lt_tan};
 			}
 			.g2-app {
-				background-color: #0083C0;
+				background-color: ${colorsHash.good8};
 			}
 			.divider {
 				width: 100%;
 				height: 20px;
 				margin-bottom: 20px;
-				border-bottom: 5px solid #0083C0;
+				border-bottom: 5px solid ${colorsHash.good8};
 			}
 
 			.h1, 
@@ -271,7 +278,7 @@ useEffect(()=> {
 			.h1 {
 				font-size: 30px;
 				letter-spacing: 5px;
-				background-image: linear-gradient(to left, #83C2E4, #8083C0);
+				background-image: linear-gradient(to left, ${colorsHash.good4}, ${colorsHash.grand6});
 				background-clip: text;
 				-webkit-background-clip: text;
 				color: transparent;
@@ -282,7 +289,7 @@ useEffect(()=> {
 			.h2 {
 				font-size: 18px;
 				margin-bottom: 7px;
-				color: #0083C0;
+				color: ${colorsHash.good8};
 			}
 			.p2 {
 				width: ${w2}px;
@@ -294,19 +301,19 @@ useEffect(()=> {
 			}
 			.reminder {
 				font-style: italic;
-				color: #f2b3bf;
+				color: ${colorsHash.bad1};
 				font-size: 14px;
 				margin-bottom: 7px;
 			}
 			.instructions {
 				font-style: italic;
-				color: #0083C0;
+				color: ${colorsHash.good8};
 				font-size: 12px;
 				margin-bottom: 5px;
 			}
 			.dev-notes {
 				font-style: italic;
-				color: #ccc;
+				color: ${colorsHash.bad1};
 				font-size: 12px;
 				margin-bottom: 5px;
 			}
@@ -326,13 +333,13 @@ useEffect(()=> {
 				width: 100vw;
 				top: 0;
 				left: 0;
-				background-color: #E6F2FF;
+				background-color: ${colorsHash.good1};
 				opacity: 0.7;
 			}
 
 			.loader {
 				--R: 150px;
-				--g1: #0083C0 96%, #0000;
+				--g1: ${colorsHash.good8} 96%, #0000;
 				--g2: #eeeeee 96%, #0000;
 				width: calc(2*var(--R));
 				aspect-ratio: 1;
@@ -379,7 +386,7 @@ useEffect(()=> {
 				text-align: center;
 				line-height: 150%;
 				letter-spacing: 7px;
-				background-image: linear-gradient(to right, #83C2E4, #8083C0);
+				background-image: linear-gradient(to right, ${colorsHash.good4}, ${colorsHash.grand6});
 				background-clip: text;
 				-webkit-background-clip: text;
 				color: transparent;
@@ -408,7 +415,7 @@ useEffect(()=> {
 				flex-direction: column;
 				margin-bottom: 7px;
 				font-size: 13px;
-				color: #63B3DB;
+				color: ${colorsHash.good6};
 			}
 			.label-white {
 				color: white;
@@ -431,8 +438,8 @@ useEffect(()=> {
 				font-size: 16px;
 				padding: 3px;
 				margin-bottom: 3px;
-				border: 0.5px solid #0083C0;
-				color: #0083C0;
+				border: 0.5px solid ${colorsHash.good8};
+				color: ${colorsHash.good8};
 				font-family: 'Arial';
 			}
 			.input-d {
@@ -500,7 +507,7 @@ useEffect(()=> {
 			}
 			.button2 {
 				height: 50px;
-				background-image: linear-gradient(to right, #83C2E4, #8083C0);
+				background-image: linear-gradient(to right, ${colorsHash.good4}, ${colorsHash.grand6});
 				margin-bottom: 15px;
 			}
 			.button3 {
@@ -527,7 +534,7 @@ useEffect(()=> {
 				color: white;
 			}
 			.button3, .button4 {
-				background-image: linear-gradient(to right, #2193C9, #83C2E4);
+				background-image: linear-gradient(to right, ${colorsHash.good7}, ${colorsHash.good4});
 				cursor: pointer;
 			}
 
@@ -551,9 +558,65 @@ useEffect(()=> {
 				opacity: 0.75;
 			}
 			.table-list-td {
+				
+			}
+			.table-column-contact_company {
+				max-width: 200px;
+			}
+			.table-column-contact_email {
 				max-width: 100px;
 			}
+			.table-column-vp_category,
+			.table-column-vp_tags,
+			.table-column-vp_members {
+				background-color: ${colorsHash.good8};
+				color: white;
+			}
+			.table-column-vp_category {
+				width: 20%;
+			}
+			.table-column-vp_tags {
+				width: 20%;
+			}
+			.table-column-vp_members {
+				width: 60%;
+			}
+			.p-vp_tags {
+				color: white;
+			}
+			.p-vp_members {
+				color: white;
+				margin-bottom: 7px;
+				cursor: pointer;
+			}
+			.p-vp_members:hover {
+				opacity: 0.75;
+			}
 
+			.vp-categories-container,
+			.vp-categories-container-3  {
+				flex-direction: row;
+				flex-wrap: wrap;
+				justify-content: space-around;
+				margin-top: 3px;
+				margin-bottom: 5px;
+			}
+			.vp-categories-container {
+				width: ${w2};
+			}
+			.vp-categories-container-3 {
+				width: ${w3};
+			}
+			.vp-category {
+				background-color: ${colorsHash.good8};
+				padding: 4px;
+				border-radius: 4px;
+				border: 1px solid ${colorsHash.grand2};
+				color: white;
+				cursor: pointer;
+				margin-bottom: 5px;
+			}
+			
 			.pie-chart {
 				position: relative;
 				width: 370px;
