@@ -2,6 +2,7 @@ import { useState } from 'react';
 // import { precisionRound,
 //   convertTimestampToString } from 'conjunction-junction';
 import Instructions from './999-instructions';
+import Controls from './99-controls';
 
 export default function Proformae(props) {
 
@@ -28,17 +29,12 @@ export default function Proformae(props) {
 		<div onClick={()=>goToMainMenu()} className='button2'>
 			<p className='button2-text'>BACK TO MAIN MENU</p>
 		</div>
-		<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
-			<p className='button2-text'>
-				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-			</p>
-		</div>
-		<p>&nbsp;</p>
-		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
-			<p className='button2-text'>
-				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-			</p>
-		</div>
+		<Controls
+			showInstructions={showInstructions}
+			setShowInstructions={setShowInstructions}
+			showDevNotes={showDevNotes}
+			setShowDevNotes={setShowDevNotes}
+		/>
 
 		<Instructions show={showInstructions}
 		  text={''}/>

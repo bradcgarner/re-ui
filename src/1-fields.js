@@ -210,7 +210,7 @@ export const theFields = {
 			fd: 'date'
 		},
 		{
-			fieldName: 'contactName', 
+			fieldName: 'contactNameCompany', 
 			label: 'contact', 
 		},
 		{
@@ -235,8 +235,13 @@ export const theFields = {
 	],
 	contacts: [
 		{
-			fieldName: 'contactName', 
+			fieldName: 'contactNameCompany', 
 			label: 'contact', 
+		},
+		{
+			fieldName: 'contactNotes', 
+			label: 'notes', 
+			limit: 50,
 		},
 		{
 			fieldName: 'contact_phone', 
@@ -257,16 +262,6 @@ export const theFields = {
 			fd: 'vl'
 		},
 		{
-			fieldName: 'contact_where_met_notes', 
-			label: 'where met', 
-			limit: 50,
-		},
-		{
-			fieldName: 'contact_notes', 
-			label: 'notes', 
-			limit: 50,
-		},
-		{
 			fieldName: 'contact_vp_status', 
 			label: 'vp status',
 			fd: 'vl',
@@ -274,10 +269,6 @@ export const theFields = {
 		{
 			fieldName: 'contact_vp_categories', 
 			label: 'vp categories',
-		},
-				{
-			fieldName: 'contact_company', 
-			label: 'company',
 		},
 		{
 			fieldName: 'contact_title', 

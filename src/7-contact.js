@@ -4,6 +4,7 @@ numberWithCommas } from 'conjunction-junction';
 import { useState } from 'react';
 import Instructions from './999-instructions';
 import Reminder from './999-reminder';
+import Controls from './99-controls';
 
 export default function Contact(props) {
 
@@ -15,7 +16,8 @@ export default function Contact(props) {
 		formatStyle,
 		saveContact,
 		handleContactChange,
-		handleVPSelection,
+		handleVPCategorySelection,
+		handleVPAreaSelection,
 		openDeal,
 		openActivity,
 		contact,
@@ -30,7 +32,12 @@ export default function Contact(props) {
 		markVPAppComplete,
 		reOpenVPAppForEditing,
 		declineVPApp,
+		missingVPData,
+		initiateReferral,
+		handleReferralBasket,
+		referralBasket,
 		// mode,
+		contactsHash,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);
@@ -63,6 +70,19 @@ export default function Contact(props) {
 	const vpAppStatusLabel = vpAppStatusData.label || '';
 	const vpAppLink = `${process.env.REACT_APP_VP_APP_URL}${vpApp.vp_temp_id}`;
 
+	const vpRefs = Array.isArray(contact.vp_refs) ? contact.vp_refs : [];
+	const vpRefsExist = vpRefs.length > 0;
+
+	const toggleReferralTo = () => {
+		return handleReferralBasket('to',c.id_contact);
+	};
+	const toggleReferralInclude = () => {
+		return handleReferralBasket('include',c.id_contact);
+	};
+
+
+	const remindMe = <p className='gentle-reminder'>{c.contact_name_first} {c.contact_name_last} {c.contact_company}</p>
+
 	return <div className='g1'>
 
 		<h1 className='h1'>CONTACT</h1>
@@ -79,18 +99,19 @@ export default function Contact(props) {
 				<p className="button2-text">Back to List Contacts</p>
 			</div>
 		}
-		<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
-			<p className='button4-text'>
-				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-			</p>
-		</div>
-		<p>&nbsp;</p>
-		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
-			<p className='button4-text'>
-				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-			</p>
-		</div>
-		<p>&nbsp;</p>
+		<Controls
+			showInstructions={showInstructions}
+			setShowInstructions={setShowInstructions}
+			showDevNotes={showDevNotes}
+			setShowDevNotes={setShowDevNotes}
+			id_contact={contact.id_contact}
+			toggleReferralTo={toggleReferralTo}
+			toggleReferralInclude={toggleReferralInclude}
+			initiateReferral={initiateReferral}
+			referralBasket={referralBasket}
+			contactsHash={contactsHash}
+		/>
+		
 
 		<Instructions show={showInstructions}
 			text={''}/>
@@ -131,7 +152,7 @@ export default function Contact(props) {
 		<div className='divider'/>
 
 		<h3 className='h2'>VENDOR PARTNER</h3>
-
+		{remindMe}
 		<div className='g1'>
 			<label className='label2'>
 				Is A Vendor Partner?
@@ -142,6 +163,46 @@ export default function Contact(props) {
 						{optionsHash['contact vp status']}
 				</select>
 			</label>
+			{
+				isAVP ?
+					<label className='label2'>
+						Vendor Partner Categories
+						<div className='vp-categories-container'>
+						{
+							Array.isArray(c.contact_vp_categories) ?
+							c.contact_vp_categories.map((c,i)=>{
+								return <p key={i} className='vp-category'
+									onClick={()=>handleVPCategorySelection(c)}>{c}</p>
+							}): null
+						}
+						</div>
+						<select className='input2'
+							value={c.vpTempCategorySelection || ''}
+							onChange={e=>handleVPCategorySelection(e.target.value)}>
+								{optionsHash.vpCategories}
+						</select>
+					</label> : null
+			}
+			{
+				isAVP ?
+					<label className='label2'>
+						Vendor Partner Service Area
+						<div className='vp-categories-container'>
+						{
+							Array.isArray(c.contact_vp_areas) ?
+							c.contact_vp_areas.map((c,i)=>{
+								return <p key={i} className='vp-category'
+									onClick={()=>handleVPAreaSelection(c)}>{c}</p>
+							}): null
+						}
+						</div>
+						<select className='input2'
+							value={c.vpTempAreaSelection || ''}
+							onChange={e=>handleVPAreaSelection(e.target.value)}>
+								{optionsHash.vpAreas}
+						</select>
+					</label> : null
+			}
 			{
 				isAVP ? <p className='p2'>Vendor Partner Application Status: {vpAppStatusLabel}</p> : null 
 			}
@@ -158,31 +219,31 @@ export default function Contact(props) {
 			{
 				!isAVP ? null :
 				!vpAppExists ?
-					<div onClick={()=>initiateVPApplication()} className='button4'>
+					<div onClick={()=>initiateVPApplication()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Initiate VP Application
 						</p>
 					</div> : 
 				vpAppStatusLabel === 'Not Sent' ?
-					<div onClick={()=>sendVPApplication()} className='button4'>
+					<div onClick={()=>sendVPApplication()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Send VP Application
 						</p>
 					</div> : 
 				vpAppStatusLabel === 'Sent To Vendor' ?
-					<div onClick={()=>sendVPApplication()} className='button4'>
+					<div onClick={()=>sendVPApplication()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Re-Send VP Application
 						</p>
 					</div> : 
 				vpAppStatusLabel === 'Returned - Review Not Started Yet' ?
-					<div onClick={()=>markVPAppInReview()} className='button4'>
+					<div onClick={()=>markVPAppInReview()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Mark Review As Started (Lock App For Editing)
 						</p>
 					</div> : 
 				vpAppStatusLabel === 'In Review' ?
-					<div onClick={()=>markVPAppComplete()} className='button4'>
+					<div onClick={()=>markVPAppComplete()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Mark Review As Complete (Start Referring)
 						</p>
@@ -198,10 +259,18 @@ export default function Contact(props) {
 				null 
 			}
 			{
+				vpAppStatusLabel !== 'Not Sent' && vpAppStatusLabel !== 'Sent To Vendor' ?
+				null :
+					Array.isArray(missingVPData)?
+						missingVPData.map((d,i)=>{
+							return <p key={i} className='error'>{` `}Missing: {d}</p>
+						}) : null
+			}
+			{
 				vpAppStatusLabel === 'In Review' || 
 				vpAppStatusLabel === 'Accepted / Active' ||
 				vpAppStatusLabel === 'Not Participating' ?
-					<div onClick={()=>reOpenVPAppForEditing()} className='button4'>
+					<div onClick={()=>reOpenVPAppForEditing()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Re-Open For Vendor Editing
 						</p>
@@ -213,40 +282,21 @@ export default function Contact(props) {
 				vpAppStatusLabel === 'Returned - Review Not Started Yet' ||
 				vpAppStatusLabel === 'In Review' || 
 				vpAppStatusLabel === 'Accepted / Active' ?
-					<div onClick={()=>declineVPApp()} className='button4'>
+					<div onClick={()=>declineVPApp()} className='button4 button-with-margin'>
 						<p className='button2-text'>
 							Remove Vendor Partner from Program
 						</p>
 					</div> : 
 					null 
 			}
-			{
-				isAVP ?
-					<label className='label2'>
-						Vendor Partner Categories
-						<div className='vp-categories-container'>
-						{
-							Array.isArray(c.contact_vp_categories) ?
-							c.contact_vp_categories.map((c,i)=>{
-								return <p key={i} className='vp-category'
-									onClick={()=>handleVPSelection(c)}>{c}</p>
-							}): null
-						}
-						</div>
-						<select className='input2'
-							value={c.vpTempSelection || ''}
-							onChange={e=>handleVPSelection(e.target.value)}>
-								{optionsHash.vpCategories}
-						</select>
-					</label> : null
-			}
+
 		</div>
 
 		{
 			vpAppExists && isAVP ?
 			<div className='g1'>
 				<h3 className='h2'>VP APPLICATION</h3>
-				<div className='g2 g2-multi g2-app'>
+				<div className='g2 g2-box g2-app'>
 		
 					<p className='p1 label-white'>Application Status: {vpAppStatusLabel}</p>
 					<p>&nbsp;</p>
@@ -345,11 +395,49 @@ export default function Contact(props) {
 			</div> : 
 			null 
 		}
+		{
+			isAVP && vpRefsExist ?
+				<div className='g1'>
+					<h3 className='h2'>VP REFERENCES</h3>
+					{
+						vpRefs.map((r,i)=>{
+							return <div key={i} className='g2 g2-box g2-app'>
+								<label className='label3 label-white'>
+									Reference By
+									<select className='edit-input edit-input-wide-nest'
+										value={r.id_contact_fu || ''}
+										style={formatStyle(r.id_contact_fu)}
+										readOnly>
+											{optionsHash.contact}
+									</select>
+								</label>
+								<label className='label3 label-white'>
+									The Reference (EXACTLY AS SENT OUT)		
+									<textarea className='edit-input edit-textarea edit-input-wide-nest'
+										value={r.convo_vp_ref || ''}
+										readOnly />
+								</label>
+								<label className='label3 label-white'>
+									Conversation Notes				
+									<textarea className='edit-input edit-textarea edit-input-wide-nest'
+										value={r.convo_notes || ''}
+										readOnly />
+								</label>
+								<div className='button4 button4-3'>
+									<p className='button4-text' onClick={()=>openActivity(r.id_activity)}>
+										Go To This Activity
+									</p>
+								</div>
+							</div>
+						})
+					}
+				</div> : null 
+		}
 
 		<div className='divider'/>
 
 		<h3 className='h2'>CONTACT INFO</h3>
-
+		{remindMe}
 		<div className='g1'>
 			<label className='label2'>
 				Phone Number
@@ -372,6 +460,16 @@ export default function Contact(props) {
 					style={formatStyle(c.contact_url)}
 					onChange={e=>handleContactChange('contact_url', e.target.value)}/>
 			</label>
+			{
+				isAVP ? 
+				<label className='label2'>
+				Review URL
+					<input className='input2'
+						value={c.contact_review_url || ''}
+						style={formatStyle(c.contact_review_url)}
+						onChange={e=>handleContactChange('contact_review_url', e.target.value)}/>
+				</label> : null 
+			}
 			<label className='label2'>
 				Address
 				<input className='input2'
@@ -399,7 +497,7 @@ export default function Contact(props) {
 		<div className='divider'/>
 
 		<h3 className='h2'>HOW MET</h3>
-
+		{remindMe}
 		<div className='g1'>
 			<label className='label2'>
 				How I First Met {c.contact_name_first || 'Them'}
@@ -447,7 +545,7 @@ export default function Contact(props) {
 		<div className='divider'/>
 
 		<h3 className='h2'>NOTES</h3>
-
+		{remindMe}
 		<div className='g1'>
 			{ isAVP ? null : <p>Birthday</p>}
 			{ isAVP ? null :
@@ -496,7 +594,7 @@ export default function Contact(props) {
 		<div className='divider'/>
 
 		<h3 className='h2'>DEALS</h3>
-
+		{remindMe}
 		<Reminder show={true}
 			text={'Deals are read only here. Edit via Activity.'} />
 
@@ -506,7 +604,7 @@ export default function Contact(props) {
 				const gciToPrint = isPrimitiveNumber(d.deal_gci) ? `$${numberWithCommas(d.deal_gci)}`: '';
 				const dateString = convertTimestampToString(d.date_deal_timestamp, 'dow d M y');
 				
-				return <div key={i} className='g2 g2-multi g2-deal'>
+				return <div key={i} className='g2 g2-box g2-deal'>
 
 					<label className='label3'>
 						Deal Name
@@ -619,7 +717,7 @@ export default function Contact(props) {
 		<div className='divider'/>
 
 		<h3 className='h2'>ACTIVITIES</h3>
-
+		{remindMe}
 		<Reminder show={true}
 			text={'Activities are read only here. Edit via Activity.'} />
 
@@ -627,7 +725,7 @@ export default function Contact(props) {
 			activities.map((a,i)=>{
 				const dateString = convertTimestampToString(a.date_convo_timestamp, 'dow d M y');
 
-				return <div className='g2 g2-multi g2-fu'>
+				return <div key={i} className='g2 g2-box g2-fu'>
 					<label className='label3'>
 						<input className='input3'
 							style={formatStyle(dateString)}

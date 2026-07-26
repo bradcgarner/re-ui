@@ -1,7 +1,7 @@
-// import { convertTimestampToString } from 'conjunction-junction';
 import { useState } from 'react';
 import Instructions from './999-instructions';
 import Graph from './8-income-graph';
+import Controls from './99-controls';
 
 export default function Metrics(props) {
 
@@ -20,17 +20,12 @@ export default function Metrics(props) {
 				<p className='button2-text'>BACK TO MAIN MENU</p>
 			</div>
 
-			<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
-				<p className='button2-text'>
-					{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-				</p>
-			</div>
-			<p>&nbsp;</p>
-			<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
-				<p className='button2-text'>
-					{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-				</p>
-			</div>
+		<Controls
+			showInstructions={showInstructions}
+			setShowInstructions={setShowInstructions}
+			showDevNotes={showDevNotes}
+			setShowDevNotes={setShowDevNotes}
+		/>
 
 		<Graph />
 

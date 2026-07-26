@@ -22,7 +22,7 @@ export const colorsHash = {
 	dark:    '#004b6e',
 	lt_blue: '#e4f2fb',
 	lt_gray: '#f0f4f4',
-	lt_tan:  '#fff7f6',
+	lt_tan:  '#F8F8F4',
 	lt_pink: '#fff3f6',
 	gray:    '#cccccc',
 };

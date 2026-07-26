@@ -179,6 +179,7 @@ function App() {
 	const formatAndSetLists = content => {
 		const {
 			vpCategories,
+			vpAreas,
 			proformae,
 			vLGroupsHash,
 			vLItemsHash, 
@@ -192,9 +193,17 @@ function App() {
 			});
 		}
 
+		const vpAreaOptions = [<option key={-1} value={-1}>ADD OR REMOVE VP AREA</option>]
+		if(Array.isArray(vpAreas)){
+			vpAreas.forEach((c,i)=>{
+				vpAreaOptions.push(<option key={i} value={c.vp_area}>{c.vp_area}</option>)
+			});
+		}
+
 		const newListsHash = {
 			// contacts: contactsOptions,
 			vpCategories: vpCategoryOptions,
+			vpAreas: vpAreaOptions,
 			months: monthOptions,
 		};
 		for(let k in vLGroupsHash){

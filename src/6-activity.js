@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { isObjectLiteral, 
 	isPrimitiveNumber,
+	convertTimestampToString,
 	numberWithCommas } from 'conjunction-junction';
 import Instructions from './999-instructions';
 import DevNotes from './999-dev-notes';
-// import Reminder from './999-reminder';
+import Controls from './99-controls';
 
 export default function Activity(props) {
 
@@ -16,6 +17,7 @@ export default function Activity(props) {
 		saveActivity,
 		addContactToActivity,
 		addFuToActivity,
+		doFollowUp,
 		goToMainMenu,
 		addDealToActivity,
 		activity,
@@ -49,7 +51,8 @@ export default function Activity(props) {
 	const connections = Array.isArray(activity.connections) ? activity.connections : [];
 	const fus = Array.isArray(activity.fus) ? activity.fus : [];
 
-	const isAFollowUp = false;
+	const isAFollowUp = !!activity.date_fu_timestamp;
+	const hasNoDate = !date_convo.date_convo_timestamp;
 
 	const dealLinkButtonStatus = dealStatusHash[activity.convo_deal_found];
 
@@ -62,6 +65,8 @@ export default function Activity(props) {
 	const vp_app_status = contactVPApp.vp_app_status;
 	const vpAppStatus = vpAppStatusHash[`${vp_app_status}`] || {};
 	const vpAppStatusLabel = vpAppStatus.label || '';
+
+	const isAVPRef = activity.convo_main_purpose === 34;
 
 	let idContactMain = null;
 	if(Array.isArray(activity.contacts)){
@@ -112,23 +117,73 @@ export default function Activity(props) {
 			</div> : null
 		}
 
-		<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
-			<p className='button4-text'>
-				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-			</p>
-		</div>
-		<p>&nbsp;</p>
-		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
-			<p className='button4-text'>
-				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-			</p>
-		</div>
-
+		<Controls
+			showInstructions={showInstructions}
+			setShowInstructions={setShowInstructions}
+			showDevNotes={showDevNotes}
+			setShowDevNotes={setShowDevNotes}
+		/>
 
 		<Instructions show={showInstructions}
 			text={`Activities include conversations, attempts to converse, receiving a vendor partner referral, contacting a vendor partner reference, any updates to a deal (because that was also via a conversation), and any real-estate specific activity such as open houses or a booth at an event.`}/>
 
 		<div className='divider'/>
+
+		{
+			isAFollowUp ?
+			<div className='g1'>
+				<h3 className='h2'>THIS IS A FOLLOW-UP</h3>
+
+				<div className='g2 g2-box g2-fu'>
+					<p>Scheduled for {convertTimestampToString(activity.date_fu_timestamp,'dow M d y')}</p>
+
+					<select className='input3'
+						value={activity.id_contact_fu || ''}
+						style={formatStyle(activity.id_contact_fu)}
+						readOnly >
+							{optionsHash.contact}
+					</select>
+					<label className='label3'>
+						Type Of Follow-Up
+						<select className='input3'
+							value={activity.fu_purpose || ''}
+							style={formatPresetStyle(activity.fu_purpose)}
+							readOnly >
+								{optionsHash['convo main purpose']}
+						</select>
+					</label>
+					<label className='label3'>
+						Related To A Deal
+						<select className='input3'
+							value={activity.id_deal_fu || ''}
+							style={formatStyle(activity.id_deal_fu)}
+							readOnly >
+								{optionsHash.deal}
+						</select>
+					</label>
+					<label className='label3'>
+						Notes For Follow-Up
+						<textarea className='input3 input-taller'
+							value={activity.fu_notes || ''}
+							style={formatStyle(activity.fu_notes)}
+							readOnly />
+					</label>
+				</div>
+		
+				{ 
+					hasNoDate ?
+					<div onClick={()=>doFollowUp()} className='button2'>
+						<p className='button2-text'>DO IT!</p>
+					</div> : null
+				}
+
+				<div onClick={()=>openActivity(activity.id_activity_fu)} className='button4'>
+					<p className='button2-text'>Go To The Originating Activity</p>
+				</div>
+
+			<div className='divider' /> 
+		</div> : null 
+		}
 
 		<h3 className='h2'>DATE</h3>
 		
@@ -163,19 +218,7 @@ export default function Activity(props) {
 
 		<Instructions show={showInstructions}
 			text={`This is the date of the actual conversation or activity. Today's date is auto-populated; edit as needed.`}/>
-		
-		{
-			isAFollowUp ?
-			<div className='g2'>
-				<p>&nbsp;</p>
-				<p>This Is A Follow-Up Scheduled For {activity.dateStringFollowUp}</p>
-				<p>Follow-Up Notes: {activity.fu_notes}</p>
-
-				<Instructions show={showInstructions}
-					text={`The information above is what you entered as your follow-up.`}/>
-			
-			</div> : null 
-		}
+	
 
 		<DevNotes show={showDevNotes}
 			text={`id_agent ${activity.id_agent}; id_activity ${activity.id_activity}; id_activity_temp ${activity.id_activity_temp}`} />
@@ -195,7 +238,7 @@ export default function Activity(props) {
 		{
 			contacts.length > 0 ? contacts.map((c,i)=>{
 				const isAVP = !!vpBinaryHash[`${c.contact_vp_status}`];
-				return <div key={i} className='g2 g2-multi g2-contact'>
+				return <div key={i} className='g2 g2-box g2-contact'>
 					<label className='label3'>
 						Select A Contact
 						<div className='input6-row'>
@@ -376,6 +419,8 @@ export default function Activity(props) {
 						{optionsHash['contact relationship']}
 				</select>
 			</label>
+			<Instructions show={showInstructions}
+				text='To check references, select main purpose of VP App Follow-Up or VP Get On List' />
 			<label className='label2'>
 				Main Purpose of the Contact
 				<select className='input2'
@@ -469,6 +514,16 @@ export default function Activity(props) {
 					style={formatStyle(activity.convo_notes)}
 					onChange={e=>handleActivityChange('convo_notes',null,null,null, e.target.value)}/>
 			</label>
+			{
+				isAVPRef ?
+				<label className='label2'>
+					VENDOR PARTNER REFERENCE (EXACTLY AS SENT OUT)
+					<textarea className='input2 input-taller'
+						value={activity.convo_vp_ref || ''}
+						style={formatStyle(activity.convo_vp_ref)}
+						onChange={e=>handleActivityChange('convo_vp_ref',null,null,null, e.target.value)}/>
+				</label> : null
+			}
 
 		</div>
 
@@ -486,7 +541,7 @@ export default function Activity(props) {
 								Load VP App for {firstContactName}
 							</p>
 						</div> : 
-						<div className='g2 g2-multi g2-app'>
+						<div className='g2 g2-box g2-app'>
 							<Instructions show={showInstructions}
 								text={`Create a connection for each reference listed. Then create a follow-up for each reference.`}/>
 
@@ -621,7 +676,7 @@ export default function Activity(props) {
 				const valueToPrint = isPrimitiveNumber(d.deal_value) ? `$${numberWithCommas(d.deal_value)}`: '';
 				const gciToPrint = isPrimitiveNumber(d.deal_gci) ? `$${numberWithCommas(d.deal_gci)}`: '';
 
-				return <div key={i} className='g2 g2-multi g2-deal'>
+				return <div key={i} className='g2 g2-box g2-deal'>
 					{
 						isPrimitiveNumber(d.id_deal) ?
 							<label className='label3'>
@@ -819,7 +874,7 @@ export default function Activity(props) {
 		{
 			connections.length > 0 ? connections.map((c,i)=>{
 				const isAVP = !!vpBinaryHash[`${c.contact_vp_status}`];
-				return <div key={i} className='g2 g2-multi contact-group'>
+				return <div key={i} className='g2 g2-box contact-group'>
 					<label className='label3'>
 						Select A Contact
 						<div className='input6-row'>
@@ -897,7 +952,7 @@ export default function Activity(props) {
 						referralHash[`${c.contact_how_met}`] ?
 							<label className='label3'>
 								{vpReferenceHash[`${c.connection_type}`] ? 'Which VP Sent Me' : 'Who First Introduced Me To'} {c.contact_name_first || 'Them'}?
-									<div className='input5-row'>
+									<div className='input6-row'>
 										{ c.id_who_introduced ? null : 
 											<input className='input5A'
 												value={activity.contactFilter || ''}
@@ -1010,7 +1065,7 @@ export default function Activity(props) {
 		{
 			fus.length > 0 ? fus.map((fu,i)=>{
 				const date_fu = fu.date_fu || {};
-				return <div key={i} className='g2 g2-multi g2-fu'>
+				return <div key={i} className='g2 g2-box g2-fu'>
 					<p>Schedule Follow-Up For {date_fu.dateString}</p>
 					<div className='date-container3'>
 						<label className='label-d'>
@@ -1073,24 +1128,36 @@ export default function Activity(props) {
 								{optionsHash['convo main purpose']}
 						</select>
 					</label>
-					<label className='label3'>
-						Related To A Deal?
-						<select className='input3'
-							value={fu.id_deal_fu || ''}
-							style={formatStyle(fu.id_deal_fu)}
-							onChange={e=>handleActivityChange('fus',i, 'id_deal_fu',null, e.target.value)}>
-								{optionsHash.deal}
-						</select>
-						{
-							!fu.id_deal_fu && Array.isArray(newDealOptions) && newDealOptions.length > 0 ?
-								<select className='input3'
-									value={fu.id_deal_fu_temp || ''}
-									style={formatStyle(fu.id_deal_fu_temp)}
-									onChange={e=>handleActivityChange('fus',i, 'id_deal_fu_temp',null, e.target.value)}>
-										{newDealOptions}
-								</select> : null 
-						}
-					</label>
+					{
+						fu.fu_purpose === 34 ? 
+						<label className='label3'>
+							Reference for Which VP?
+							<select className='input3'
+								value={fu.id_vp_fu || ''}
+								style={formatStyle(fu.id_vp_fu)}
+								onChange={e=>handleActivityChange('fus',i, 'id_vp_fu',null, e.target.value)}>
+									{optionsHash.contact}
+							</select>
+						</label> :
+						<label className='label3'>
+							Related To A Deal?
+							<select className='input3'
+								value={fu.id_deal_fu || ''}
+								style={formatStyle(fu.id_deal_fu)}
+								onChange={e=>handleActivityChange('fus',i, 'id_deal_fu',null, e.target.value)}>
+									{optionsHash.deal}
+							</select>
+							{
+								!fu.id_deal_fu && Array.isArray(newDealOptions) && newDealOptions.length > 0 ?
+									<select className='input3'
+										value={fu.id_deal_fu_temp || ''}
+										style={formatStyle(fu.id_deal_fu_temp)}
+										onChange={e=>handleActivityChange('fus',i, 'id_deal_fu_temp',null, e.target.value)}>
+											{newDealOptions}
+									</select> : null 
+							}
+						</label>
+					}
 					<label className='label3'>
 						Notes For Follow-Up
 						<textarea className='input3 input-taller'
@@ -1140,7 +1207,7 @@ export default function Activity(props) {
 			<div onClick={()=>listActivities()} className="button2">
 				<p className="button2-text">Back to Activities List</p>
 			</div> :
-			modePrior === 'fus' ?
+			modePrior === 'follow-ups' ?
 			<div onClick={()=>listFus()} className="button2">
 				<p className="button2-text">Back to Follow-Up List</p>
 			</div> : null

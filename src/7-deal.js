@@ -6,6 +6,7 @@ import { useState } from 'react';
 import Instructions from './999-instructions';
 import DevNotes from './999-dev-notes';
 import Reminder from './999-reminder';
+import Controls from './99-controls';
 
 export default function Deal(props) {
 
@@ -47,17 +48,12 @@ export default function Deal(props) {
 		<div onClick={()=>listDeals()} className="button2">
 			<p className="button2-text">Back to List Deals</p>
 		</div>
-		<div onClick={()=>setShowInstructions(!showInstructions)} className='button4'>
-			<p className='button2-text'>
-				{showInstructions ? 'Hide Instructions' : 'Show Instructions'}	
-			</p>
-		</div>
-		<p>&nbsp;</p>
-		<div onClick={()=>setShowDevNotes(!showDevNotes)} className='button4'>
-			<p className='button2-text'>
-				{showDevNotes ? 'Hide Dev Notes' : 'Show Dev Notes'}	
-			</p>
-		</div>
+		<Controls
+			showInstructions={showInstructions}
+			setShowInstructions={setShowInstructions}
+			showDevNotes={showDevNotes}
+			setShowDevNotes={setShowDevNotes}
+		/>
 
 		<Instructions show={showInstructions}
 			text={''}/>
@@ -228,7 +224,7 @@ export default function Deal(props) {
 
 				const isAVP = vpBinaryHash[`${c.contact_vp_status}`];
 
-				return <div key={i} className='g2 g2-multi contact-group'>
+				return <div key={i} className='g2 g2-box contact-group'>
 					<label className='label3'>
 						<input className='input4'
 							value={c.contact_name_first || ''}
@@ -304,7 +300,7 @@ export default function Deal(props) {
 			activities.map((a,i)=>{
 				const dateString = convertTimestampToString(a.date_convo_timestamp, 'dow d M y');
 
-				return <div className='g2 g2-multi g2-fu'>
+				return <div key={i} className='g2 g2-box g2-fu'>
 					<label className='label3'>
 						<input className='input3'
 							style={formatStyle(dateString)}

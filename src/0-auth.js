@@ -33,7 +33,7 @@ export default function Auth(props) {
 				return res.json();
 			})
 			.then(r=>{
-				console.log(r);
+				// console.log(r);
 				setIsLoading(false);
 			})
 			.catch(err=>{
@@ -55,7 +55,7 @@ export default function Auth(props) {
 				return res.json();
 			})
 			.then(r=>{
-				console.log(r);
+				// console.log(r);
 				setIsLoading(false);
 				const authToken = typeof r.authToken === 'string' ? r.authToken : null ;
 				if(authToken){
@@ -88,7 +88,7 @@ useEffect(()=> {
 				return res.json();
 			})
 			.then(r=>{
-				console.log(r);
+				// console.log(r);
 				const newAuthToken = typeof r.authToken === 'string' ? r.authToken : null ;
 				if(newAuthToken){
 					localStorage.setItem('authToken', newAuthToken);
@@ -246,7 +246,7 @@ useEffect(()=> {
 				width: ${w2}px;
 				margin-bottom: 1vh;
 			}
-			.g2-multi {
+			.g2-box {
 				border: 1px solid ${colorsHash.good2};
 				border-radius: 10px;
 				padding: 10px;
@@ -261,6 +261,9 @@ useEffect(()=> {
 				background-color: ${colorsHash.lt_tan};
 			}
 			.g2-app {
+				background-color: ${colorsHash.good8};
+			}
+			.g2-prior-dp {
 				background-color: ${colorsHash.good8};
 			}
 			.divider {
@@ -295,11 +298,25 @@ useEffect(()=> {
 				width: ${w2}px;
 				margin-bottom: 7px;
 			}
+			.p3 {
+				width: ${w3}px;
+				margin-bottom: 3px;
+			}
+			.p3-right {
+				text-align: right;
+			}
+			.p4 {
+				width: ${w4}px;
+				margin-bottom: 3px;
+			}
+			.p4-right {
+				text-align: right;
+			}
 			.about-p {
 				margin-bottom: 10px;
 				text-align: center;
 			}
-			.reminder {
+			.reminder, .error {
 				font-style: italic;
 				color: ${colorsHash.bad1};
 				font-size: 14px;
@@ -316,6 +333,12 @@ useEffect(()=> {
 				color: ${colorsHash.bad1};
 				font-size: 12px;
 				margin-bottom: 5px;
+			}
+			.gentle-reminder {
+				font-style: italic;
+				color: ${colorsHash.good4};
+				font-size: 10px;
+				margin-bottom: 2px;
 			}
 
 			.loader-background {
@@ -537,6 +560,11 @@ useEffect(()=> {
 				background-image: linear-gradient(to right, ${colorsHash.good7}, ${colorsHash.good4});
 				cursor: pointer;
 			}
+			.button-with-margin {
+				padding: 20px;
+				margin-top: 15px;
+				margin-bottom: 15px;
+			}
 
 			.date-container2,
 			.date-container3 {
@@ -557,8 +585,11 @@ useEffect(()=> {
 			.table-list-tr:hover {
 				opacity: 0.75;
 			}
+			.table-list-th {
+				max-width: 100px;
+			}
 			.table-list-td {
-				
+				word-wrap: break-word;
 			}
 			.table-column-contact_company {
 				max-width: 200px;
@@ -592,6 +623,13 @@ useEffect(()=> {
 			.p-vp_members:hover {
 				opacity: 0.75;
 			}
+			.p-dp-fus {
+				width: 100%;
+				margin-bottom: 5px;
+				border-bottom: 1px solid ${colorsHash.good1};
+				padding-left: 7px;
+				padding-bottom: 3px;
+			}
 
 			.vp-categories-container,
 			.vp-categories-container-3  {
@@ -616,10 +654,15 @@ useEffect(()=> {
 				cursor: pointer;
 				margin-bottom: 5px;
 			}
+
+			.coach-div {
+				flex-direction: column;
+				margin-bottom: 10px;
+			}
 			
 			.pie-chart {
 				position: relative;
-				width: 370px;
+				width: ${w3}px;
 				min-height: 400px;
 				margin: 0;
 			}
@@ -650,6 +693,40 @@ useEffect(()=> {
 				display: block;
 				width: 100vw;
 				height: 100vh;
+			}
+
+			.svg-row {
+				flex-direction: row;
+				justify-content: space-between;
+				padding-left: 20px;
+				padding-right: 20px;
+			}
+			.svg-container {
+				display: block;
+				width: 40px;
+				height: 40px;
+				cursor: pointer;
+			}
+			.svg-container:hover {
+				opacity: 0.75;
+			}
+			.svg-white {
+				fill: white;	
+			}
+			.svg-on {
+				fill: ${colorsHash.good8};
+			}
+			.svg-off {
+				fill: ${colorsHash.good2};
+			}
+			.svg-red {
+				fill: ${colorsHash.bad1};
+			}
+			.svg-hand {
+				fill-rule: evenodd;
+			}
+			.svg-send {
+				fill-rule: evenodd;			
 			}
 		`}</style>
 	</div>

@@ -28,7 +28,7 @@ export default function IncomeGraph(props) {
 	const w = 85;
 
 	return <div className="graph-container">
-		<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2235 1100">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2235 1100">
 			<line className="shape" x1="0" y1="1002" x2="2235" y2="1002"/>
 			{
 				dealGroups.map((s,i)=>{

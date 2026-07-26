@@ -12,7 +12,6 @@ import {convertIntegersToTimestamp,
 import { scrollToTop } from 'browser-helpers';
 
 import { theFields } from './1-fields';
-import { coachContent } from './1-coach-content';
 
 import Menu from "./2-menu";
 import Activity from "./6-activity";
@@ -28,6 +27,8 @@ import Income from './8-income';
 import AppParams from './99-app-params';
 import { colorsHash } from './0-colors';
 import VPCategories from './7-vp-categories';
+import { convertStringToTimestamp } from 'conjunction-junction/build/date-time';
+import Referral from './7-referral';
 
 const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
@@ -72,17 +73,28 @@ function App2(props) {
 
 	const [dailyPlans, setDailyPlans] = useState([]);
 	const [dailyPlan, setDailyPlan] = useState({});
+	const [dpPrior, setDpPrior] = useState({});
+	const [quickStats, setQuickStats] = useState({});
 
-	const [activities, setActivities] = useState([]);
 	const [activity, setActivity] = useState({});
+	const [activities, setActivities] = useState([]);
 	const [fus, setFus] = useState([]);
 
-	const [contacts, setContacts] = useState([]);
-	const [vps, setVPs] = useState([]);
-	const [vpGroupHash, setVPGroupHash] = useState({});
 	const [contact, setContact] = useState({});
+	const [contacts, setContacts] = useState([]);
+	const [contactNameSearch, setContactNameSearch] = useState('');
+	const [contactNoteSearch, setContactNoteSearch] = useState('');
+
+	const [vps, setVPs] = useState([]);
+	const [vpSearch, setVpSearch] = useState('');
+	
+	const [vpGroupHash, setVPGroupHash] = useState({});
 	const [vpAppStatusHash, setVpAppStatusHash] = useState({});
 	const [contactVPApp, setContactVPApp] = useState({});
+	const [missingVPData, setMissingVPData] = useState([]);
+
+	const [referralBasket, setReferralBasket] = useState({});
+	const [vpReferrals, setVPReferrals] = useState({});
 
 	const [deals, setDeals] = useState([]);
 	const [deal, setDeal] = useState({});
@@ -96,6 +108,7 @@ function App2(props) {
 
 	const [incomeData, setIncomeData] = useState({});
 	
+	const [coachContent, setCoachContent] = useState({});
 
 	// @@@@@@@@@@@@@@@@@ GENERAL @@@@@@@@@@@@@@@@@@@@
 
@@ -234,6 +247,7 @@ function App2(props) {
 
 	const createNewDailyPlan = () => {
 		setMode('daily-plan');
+		setFus([]); // to avoid them loading by default as the full list in the daily plan
 		const today = new Date();
 		const newDP = {
 			id_agent,
@@ -245,6 +259,21 @@ function App2(props) {
 			},
 		}
 		setDailyPlan(newDP);
+
+		const init = {
+			method: 'GET',
+			headers: {Authorization: `Bearer ${localStorage.authToken}`},
+		};
+		fetch(`${REACT_APP_API_URL}api/daily-plans/quick-stats`, init)
+				.then(res=>{
+					return res.json();
+				})
+				.then(r=>{
+					setQuickStats(r);
+				})
+				.catch(err=>{
+					console.error(err);
+				});
 	};
 
 	const listDailyPlans = () => {
@@ -342,6 +371,28 @@ function App2(props) {
 				});	
 	};
 
+	const loadDpPrior = dateDailyPlan => {
+		const init = {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+		};
+		const dateString = `${dateDailyPlan.date_dp_year}-${dateDailyPlan.date_dp_month}-${dateDailyPlan.date_dp_day}`
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/daily-plans/prior?dateDailyPlan=${dateString}`, init)
+				.then(res=>{
+					return res.json();
+				})
+				.then(r=>{
+					setDpPrior(r);
+					setIsLoading(false);
+				})
+				.catch(err=>{
+					console.error(err);
+				});	
+	};
+
 	// @@@@@@@@@@@@@@@@@ ACTIVITIES @@@@@@@@@@@@@@@@@@@@
 
 	const createNewActivity = () => {
@@ -377,6 +428,120 @@ function App2(props) {
 		setMode('activity');
 	};
 
+	const doFollowUp = () => {
+		const newActivity = JSON.parse(JSON.stringify(activity));
+		const dateToday = new Date();
+
+		newActivity.date_convo = {
+			date_convo_year: dateToday.getFullYear(),
+			date_convo_month: dateToday.getMonth(),
+			date_convo_day: dateToday.getDate(),
+			date_convo_timestamp: dateToday,
+			dateString: convertTimestampToString(dateToday,'dow d M y'),
+		};
+		newActivity.convo_main_purpose = newActivity.fu_purpose;
+		newActivity.convo_notes = newActivity.fu_notes;
+		newActivity.convo_deal_found = 75;
+
+		// addContactToActivity
+		const connection_record_type = 'main';
+
+		if(!Array.isArray(newActivity.connections)){
+			newActivity.connections = [];
+		}
+		if(!Array.isArray(newActivity.contacts)){
+			newActivity.contacts = [];
+		}
+		const contactIndex = newActivity.connections.length + newActivity.contacts.length;
+		const id_contact_temp = `${activity.id_activity_temp}-${connection_record_type}-${contactIndex}`;
+		
+		const newContact = {
+			id_agent,
+			id_contact: newActivity.id_contact_fu,
+			id_who_introduced: null,
+			id_who_introduced_temp: null,
+			id_activity: activity.id_activity || null,
+			id_activity_temp: `${activity.id_activity_temp}-X`,
+			id_contact_temp,
+			contact_how_met: null,
+			contact_where_met: null,
+			contact_where_met_notes: null,
+			contact_notes: '',
+			contact_name_first: null,
+			contact_name_last: null,
+			contact_phone: null,
+			contact_email: null,
+			contact_vp_categories: null,
+			contact_vp_areas: null,
+			contact_vp_status: null,
+			connection_record_type,
+		};
+
+		// handleActivityChange contacts
+
+		const contactFound = contactsHash[`${newContact.id_contact}`];
+		if(contactFound){
+			for(let x in contactFound){
+				newContact[x] = contactFound[x];
+			}
+		}
+
+		newActivity.contacts.push(newContact);
+
+		// addDealToActivity
+		if(!Array.isArray(newActivity.deals)){
+			newActivity.deals = [];
+		}
+		const dealIndex = newActivity.deals.length;
+
+		const newDeal = {
+			id_agent,
+			id_deal: newActivity.id_deal_fu,
+			id_activity: activity.id_activity || null,
+			id_activity_temp: `${activity.id_activity_temp}-X`,
+			id_deal_temp: `${activity.id_activity_temp}-deal-${dealIndex}`,
+			deal_name: '',
+			deal_address: '',
+			deal_how_found: null,
+			deal_how_found_categ: null,
+			deal_trigger: null,
+			deal_type: null,
+			deal_stage: null,
+			deal_timeline_stated: null,
+			deal_timeline_status: null,
+			date_deal: {
+				date_deal_year: null,
+				date_deal_month: null,
+				date_deal_day: null,
+			},
+			deal_value: null,
+			deal_value_status: null,
+			deal_commission_rate: null,
+			deal_gci: null,
+			deal_notes: '',
+		};
+
+		const dealFound = dealsHash[`${newDeal.id_deal}`];
+		const dealDateFields = {
+			date_deal_year: true,
+			date_deal_month: true,
+			date_deal_day: true,
+			date_deal_timestamp: true,
+		};
+		if(dealFound){
+			for(let x in dealFound){
+				if(dealDateFields[x]){
+					newDeal.date_deal[x] = dealFound[x];
+				} else {
+					newDeal[x] = dealFound[x];
+				}
+			}
+		}
+		newActivity.deals.push(newDeal);
+
+		setActivity(newActivity);
+	};
+
 	const listActivities = () => {
 		setIsLoading(true);
 		const init = {
@@ -406,13 +571,14 @@ function App2(props) {
 				});
 	};
 
-	const listFus = () => {
+	const listFus = limitToCurrent => {
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
 			headers: {Authorization: `Bearer ${localStorage.authToken}`},
 		};
-		fetch(`${REACT_APP_API_URL}api/activities/follow-ups`, init)
+		const queryString = limitToCurrent ? '?limit=current' : '';
+		fetch(`${REACT_APP_API_URL}api/activities/follow-ups${queryString}`, init)
 				.then(res=>{
 					return res.json();
 				})
@@ -420,11 +586,15 @@ function App2(props) {
 					const newFus = Array.isArray(r) ?
 						r.map(a=>{
 							const contact = contactsHash[`${a.id_contact_fu}`];
-							const contactName = contact ? `${contact.contact_name_first || ''} ${contact.contact_name_last || ''}` : '';
-							return {...a, contactName}
+							const hydratedFields = hydrateContact(contact);
+							const date_fu_timestamp = convertStringToTimestamp(a.date_fu_timestamp);
+							return {...a, ...hydratedFields, date_fu_timestamp}
 						}) : [];
 					setFus(newFus);
-					setMode('follow-ups');
+					if(!limitToCurrent){
+						setMode('follow-ups');
+						scrollToTop();
+					}
 					setIsLoading(false);
 				})
 				.catch(err=>{
@@ -454,7 +624,6 @@ function App2(props) {
 	};
 
 	const handleActivityChange = (one, index, two, three, value) => {
-
 		const dealDateFields = {
 			date_deal_year: true,
 			date_deal_month: true,
@@ -474,6 +643,7 @@ function App2(props) {
 			contact_phone: null,
 			contact_email: null,
 			contact_vp_categories: null,
+			contact_vp_areas: null,
 			contact_vp_status: null,
 			connection_record_type: null,
 			connection_type: null,
@@ -692,7 +862,7 @@ function App2(props) {
 		const newA = JSON.parse(JSON.stringify(activity));
 		const contacts = Array.isArray(newA.contacts) ? newA.contacts : [];
 		const thisContact = contacts[i] || {};
-		thisContact.vpTempSelection = v;
+		thisContact.vpTempCategorySelection = v;
 		if(!Array.isArray(thisContact.contact_vp_categories)){
 			thisContact.contact_vp_categories = [];
 		}
@@ -732,6 +902,7 @@ function App2(props) {
 			contact_phone: null,
 			contact_email: null,
 			contact_vp_categories: null,
+			contact_vp_areas: null,
 			contact_vp_status: null,
 			connection_record_type,
 		};
@@ -765,14 +936,25 @@ function App2(props) {
 			dateString: convertTimestampToString(date2,'dow d M y'),
 			date_fu_timestamp: date2,
 		};
+		if(!Array.isArray(newActivity.connections)){
+			newActivity.connections = [];
+		}
+		if(!Array.isArray(newActivity.contacts)){
+			newActivity.contacts = [];
+		}
+		if(!Array.isArray(newActivity.deals)){
+			newActivity.deals = [];
+		}
+		const contact1 = newActivity.contacts[0] || {}
+		const deal1 = newActivity.deals[0] || {}
 		const newFu = {
 			id_agent: activity.id_agent || id_agent,
 			id_activity_fu: activity.id_activity || null,
 			id_activity_temp: `${activity.id_activity_temp}-X`,
-			id_deal_fu: null,
-			id_deal_fu_temp: '',
-			id_contact_fu: null,
-			id_contact_fu_temp: '',
+			id_deal_fu: deal1.id_deal || null,
+			id_deal_fu_temp: deal1.id_deal_temp || null,
+			id_contact_fu: contact1.id_contact || null,
+			id_contact_fu_temp: contact1.id_contact_temp || null,
 			date_fu,
 			fu_purpose: null,
 			fu_notes: '',
@@ -783,7 +965,6 @@ function App2(props) {
 	};
 
 	const processVPReferences = () => {
-		setIsLoading(true);
 
 		const newActivity = JSON.parse(JSON.stringify(activity));
 		if(!Array.isArray(newActivity.connections)){
@@ -839,6 +1020,7 @@ function App2(props) {
 			contact_phone: '',
 			contact_email: '',
 			contact_vp_categories: null,
+			contact_vp_areas: null,
 			connection_vp_reference: '',
 			contact_vp_status: 170,
 			connection_type: 159,
@@ -869,6 +1051,7 @@ function App2(props) {
 			id_deal_fu: null,
 			id_deal_fu_temp: '',
 			id_contact_fu: null,
+			id_vp_fu: vp.id_contact,
 			date_fu: {
 				date_fu_year: date2.getFullYear(),
 				date_fu_month: date2.getMonth(),
@@ -877,19 +1060,22 @@ function App2(props) {
 				date_fu_timestamp: date2,
 			},
 			fu_purpose: 34,
-			fu_notes: `Call reference submitted by ${vp.contact_name_first} ${vp.contact_name_last} of ${vp.contact_company}`,
+			fu_notes: `Call reference submitted by ${vp.contact_name_first} ${vp.contact_name_last} of ${vp.contact_company}.`,
 		};
 		const newFu1 = {
 			...newFu,
 			id_contact_fu_temp: id_contact_temp1,
+			fu_notes: `${newFu.fu_notes} ${contactVPApp.vp_ref1}`
 		};
 		const newFu2 = {
 			...newFu,
 			id_contact_fu_temp: id_contact_temp2,
+			fu_notes: `${newFu.fu_notes} ${contactVPApp.vp_ref2}`
 		};
 		const newFu3 = {
 			...newFu,
 			id_contact_fu_temp: id_contact_temp3,
+			fu_notes: `${newFu.fu_notes} ${contactVPApp.vp_ref3}`
 		};
 
 		newActivity.connections.push(newContact1);
@@ -900,7 +1086,6 @@ function App2(props) {
 		newActivity.fus.push(newFu3);
 
 		setActivity(newActivity);
-		setIsLoading(false);
 		
 	};
 
@@ -966,6 +1151,20 @@ function App2(props) {
 
 	// @@@@@@@@@@@@@@@@@ CONTACTS @@@@@@@@@@@@@@@@@@@@
 
+	const hydrateContact = c => {
+		if(!c){
+			return {};
+		}
+		const company = c.contact_company ? ` | ${c.contact_company}` : '';
+		const contactNameCompany = `${c.contact_name_first || ''} ${c.contact_name_last || ''}${company}`;
+		const metNotes = c.contact_where_met_notes ? `MET: ${c.contact_where_met_notes}` : '';
+		const contactNotes = `${c.contact_notes || ''}${metNotes}`;
+		return {
+			contactNameCompany,
+			contactNotes,
+		};
+	};
+
 	const listContacts = () => {
 		setIsLoading(true);
 		const init = {
@@ -979,8 +1178,8 @@ function App2(props) {
 				.then(r=>{
 					const newContacts = Array.isArray(r) ?
 						r.map(a=>{
-							const contactName = `${a.contact_name_first || ''} ${a.contact_name_last || ''}`;
-							return {...a, contactName}
+							const hydratedFields = hydrateContact(a);
+							return {...a, ...hydratedFields};
 						}) : [];
 					setContacts(newContacts);
 					setMode('contacts');
@@ -1040,6 +1239,7 @@ function App2(props) {
 	};
 
 	const openContact = id_contact => {
+
 		setIsLoading(true);
 		const init = {
 			method: 'GET',
@@ -1052,6 +1252,7 @@ function App2(props) {
 			.then(r=>{
 				setContact(r);
 				setContactVPApp({}); // clear out since a new contact
+				setMissingVPData([]); // clear out...
 				setMode('contact');
 				setIsLoading(false);
 				scrollToTop();
@@ -1092,9 +1293,20 @@ function App2(props) {
 		setContact(newC);
 	};
 
-	const handleVPSelection = v => {
+	const handleContactSearch = (k, v) => {
+		const v2 = typeof v === 'string' ? v.toLowerCase() : '';
+		if(k === 'name'){
+			setContactNameSearch(v2);
+			setContactNoteSearch('');
+		} else {
+			setContactNameSearch('');
+			setContactNoteSearch(v2);
+		}
+	};
+
+	const handleVPCategorySelection = v => {
 		const newC = JSON.parse(JSON.stringify(contact));
-		newC.vpTempSelection = v;
+		newC.vpTempCategorySelection = v;
 		if(!Array.isArray(newC.contact_vp_categories)){
 			newC.contact_vp_categories = [];
 		}
@@ -1103,6 +1315,21 @@ function App2(props) {
 			newC.contact_vp_categories.push(v);
 		} else {
 			newC.contact_vp_categories = immutableArraySplice(index, newC.contact_vp_categories);
+		}
+		setContact(newC);
+	};
+
+	const handleVPAreaSelection = v => {
+		const newC = JSON.parse(JSON.stringify(contact));
+		newC.vpTempAreaSelection = v;
+		if(!Array.isArray(newC.contact_vp_areas)){
+			newC.contact_vp_areas = [];
+		}
+		const index = newC.contact_vp_areas.indexOf(v);
+		if(index === -1){
+			newC.contact_vp_areas.push(v);
+		} else {
+			newC.contact_vp_areas = immutableArraySplice(index, newC.contact_vp_areas);
 		}
 		setContact(newC);
 	};
@@ -1163,6 +1390,7 @@ function App2(props) {
 
 	const sendVPApplication = () => {
 		const vpApp = contact.vp_app || {};
+		const mVPD = [];
 		const vp = {
 			id_contact: contact.id_contact,
 			contact_name_first: contact.contact_name_first,
@@ -1175,10 +1403,11 @@ function App2(props) {
 		for(let k in vp){
 			if(!vp[k]){
 				ok = false;
+				mVPD.push(k);
 			}
 		}
+		setMissingVPData(mVPD);
 		if(!ok){
-			console.log('MISSING DATA',vp);
 			return;
 		}
 
@@ -1360,6 +1589,121 @@ function App2(props) {
 			});
 	};
 
+	const handleReferralBasket = (f, id_contact) => {
+		console.log('handleReferralBasket')
+		const newRB = JSON.parse(JSON.stringify(referralBasket));
+		if(!newRB.to){
+			newRB.to = {};
+		}
+		if(!newRB.include){
+			newRB.include = {};
+		}
+		if(newRB[f]){ // to or include, or skip if none/error
+			if(newRB[f][`${id_contact}`]){
+				delete newRB[f][`${id_contact}`];
+			} else {
+				newRB[f][`${id_contact}`] = true;
+			}
+		}
+		setReferralBasket(newRB);
+	};
+
+  const initiateReferral = () => {
+		setMode('referral');
+	};
+
+	const getReferralInfo = () => {
+		setIsLoading(true);
+		const init = {
+			method: 'PUT', // only so we can use the body
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`
+			},
+			body: JSON.stringify(referralBasket),
+		};
+		fetch(`${REACT_APP_API_URL}api/contacts/get-refs`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(rb=>{
+				console.log(rb);
+				const rbTo = rb.to || {};
+				const rbIncl = rb.include || {};
+				const rbInclKeys = Object.keys(rbIncl);
+				const messagePart1 = rbInclKeys.length > 1 ?
+					'The contacts we talked about are below' :
+					'The contact we talked about is below';
+				const referrals = [];
+				for(let k in rbTo){
+					const c = rbTo[k].contact || {};
+					const ref = {
+						addr: c.contact_email,
+						sal: 'Hi',
+						dear: c.contact_name_first,
+						message: `${messagePart1}, along with their references. I'll check back to see how things go. Please let me know if you need anything else, real estate or otherwise.`,
+						refs: [],
+					};
+					for(let v in rbIncl){
+						const v1 = rbIncl[v] || {};
+						console.log({v1})
+						const vpC = v1.contact || {};
+						const title = vpC.contact_title ? `, ${vpC.contact_title}` : '';
+						const refs = Array.isArray(v1.refs) ? v1.refs.map(r=>{
+							const byC = contactsHash[`${r.id_contact_fu}`] || {};
+							return {
+								rev: r.convo_vp_ref || '',
+								by: `${byC.contact_name_first} ${byC.contact_address_city || ''} ${byC.contact_address_state || ''}`,
+							};
+						}): [];
+						console.log({refs, v1Refs: v1.refs})
+						const vRef = {
+							co: vpC.contact_company,
+							poc: `${vpC.contact_name_first} ${vpC.contact_name_last}${title}`,
+							ph: vpC.contact_phone,
+							em: vpC.contact_email,
+							url: vpC.contact_url,
+							addr: `${vpC.contact_address_street}, ${vpC.contact_address_city}, ${vpC.contact_address_state}`,
+							cat: Array.isArray(vpC.contact_vp_categories) ? vpC.contact_vp_categories.join(', ') : '',
+							area: Array.isArray(vpC.contact_vp_areas) ? vpC.contact_vp_areas.join(', ') : '',
+							rev: `If you're happy with their services, please leave them a review at`,
+							revUrl: vpC.contact_review_url,
+							refs,
+						};
+						ref.refs.push(vRef);
+					}
+					referrals.push(ref);
+				}
+				setVPReferrals(referrals);
+				scrollToTop();
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+
+	};
+
+	const sendReferral = () => {
+		setIsLoading(true);
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`
+			},
+			body: JSON.stringify(vpReferrals),
+		};
+		fetch(`${REACT_APP_API_URL}api/contacts/send-refs`, init)
+			.then(res=>{
+				setIsLoading(false);
+				return res.json();
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
 	// @@@@@@@@@@@@@@@@@ DEALS @@@@@@@@@@@@@@@@@@@@
 
 	const listDeals = () => {
@@ -1494,8 +1838,26 @@ function App2(props) {
 	// @@@@@@@@@@@@@@@@@ COACHING @@@@@@@@@@@@@@@@@@@@
 
 	const openCoach = coachMode => {
-		setMode(coachMode);
-		scrollToTop();
+		setIsLoading(true);
+
+		const init = {
+			method: 'GET',
+			headers: {Authorization: `Bearer ${localStorage.authToken}`},
+		};
+		const queryString = `?a=x&b=y`
+		fetch(`${REACT_APP_API_URL}api/coaching${queryString}`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setCoachContent(r);
+				setMode(coachMode);
+				setIsLoading(false);
+				scrollToTop();
+			})
+			.catch(err=>{
+				console.error(err);
+			});
 	};
 
 	const openCoreValues = () => {
@@ -1517,7 +1879,11 @@ function App2(props) {
 			.catch(err=>{
 				console.error(err);
 			});
-	}
+	};
+
+	const handleCoachChange = (fieldName, index, value) => {
+		console.log({fieldName,index,value});
+	};
 
 	// @@@@@@@@@@@ MISC @@@@@@@@@@@
 
@@ -1587,6 +1953,11 @@ function App2(props) {
 			formatStyle={formatStyle}
 			handleDailyPlanChange={handleDailyPlanChange}
 			saveDailyPlan={saveDailyPlan}
+			loadDpPrior={loadDpPrior}
+			listFus={listFus}
+			fus={fus}
+			quickStats={quickStats}
+			dpPrior={dpPrior}
 			dailyPlan={dailyPlan}
 			vLItemsHash={vLItemsHash}
 			optionsHash={optionsHash}
@@ -1605,7 +1976,7 @@ function App2(props) {
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openDailyPlan}
-			openKey={'id_dp'}
+			idKey={'id_dp'}
 			header='DAILY PLANS'
 			items={dailyPlans}
 			theFields={theFields.dailyPlans}
@@ -1613,6 +1984,7 @@ function App2(props) {
 		mode === 'activity' ?
 		<Activity
 			handleActivityChange={handleActivityChange}
+			doFollowUp={doFollowUp}
 			handleActivityVPSelection={handleActivityVPSelection}
 			processVPReferences={processVPReferences}
 			saveActivity={saveActivity}
@@ -1652,7 +2024,7 @@ function App2(props) {
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openActivity}
-			openKey={'id_activity'}
+			idKey={'id_activity'}
 			header='ACTIVITIES'
 			items={activities}
 			theFields={theFields.activities}
@@ -1667,7 +2039,7 @@ function App2(props) {
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openActivity}
-			openKey={'id_activity'}
+			idKey={'id_activity'}
 			header='FOLLOW-UPS'
 			items={fus}
 			theFields={theFields.fus}
@@ -1678,11 +2050,14 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
+			handleContactSearch={handleContactSearch}
+			contactNameSearch={contactNameSearch}
+			contactNoteSearch={contactNoteSearch}
 			vLItemsHash={vLItemsHash}
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openContact}
-			openKey={'id_contact'}
+			idKey={'id_contact'}
 			header='CONTACTS'
 			items={contacts}
 			theFields={theFields.contacts}
@@ -1699,7 +2074,7 @@ function App2(props) {
 			modePrior={modePrior}
 			openItem={openContact}
 			listVPCategories={listVPCategories}
-			openKey={'id_contact'}
+			idKey={'id_contact'}
 			header='VENDOR PARTNERS'
 			items={vps}
 			theFields={theFields.vps}
@@ -1716,7 +2091,7 @@ function App2(props) {
 			modePrior={modePrior}
 			openContact={openContact}
 			listVPs={listVPs}
-			openKey={'id_contact'}
+			idKey={'id_contact'}
 			vpGroupHash={vpGroupHash}
 		/> :
 		mode === 'contact' ?
@@ -1728,7 +2103,8 @@ function App2(props) {
 			formatStyle={formatStyle}
 			saveContact={saveContact}
 			handleContactChange={handleContactChange}
-			handleVPSelection={handleVPSelection}
+			handleVPCategorySelection={handleVPCategorySelection}
+			handleVPAreaSelection={handleVPAreaSelection}
 			openDeal={openDeal}
 			openActivity={openActivity}
 			initiateVPApplication={initiateVPApplication}
@@ -1737,6 +2113,10 @@ function App2(props) {
 			markVPAppComplete={markVPAppComplete}
 			reOpenVPAppForEditing={reOpenVPAppForEditing}
 			declineVPApp={declineVPApp}
+			missingVPData={missingVPData}
+			handleReferralBasket={handleReferralBasket}
+			referralBasket={referralBasket}
+			initiateReferral={initiateReferral}
 			contact={contact}
 			vLItemsHash={vLItemsHash}
 			vpBinaryHash={vpBinaryHash}
@@ -1744,6 +2124,18 @@ function App2(props) {
 			optionsHash={optionsHash}
 			modePrior={modePrior}
 			mode={mode}
+			contactsHash={contactsHash}
+		/> :
+		mode === 'referral' ?
+		<Referral
+			goToMainMenu={goToMainMenu}
+			openContact={openContact}
+			referralBasket={referralBasket}
+			contactsHash={contactsHash}
+			handleReferralBasket={handleReferralBasket}
+			getReferralInfo={getReferralInfo}
+			sendReferral={sendReferral}
+			vpReferrals={vpReferrals}
 		/> :
 		mode === 'deals' ?
 		<TableList 
@@ -1755,7 +2147,7 @@ function App2(props) {
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openDeal}
-			openKey='id_deal'
+			idKey='id_deal'
 			header='DEALS'
 			items={deals}
 			theFields={theFields.deals}
@@ -1805,7 +2197,8 @@ function App2(props) {
 		mode === 'pitch' ?
 		<Coach
 			goToMainMenu={goToMainMenu}
-			content={coachContent[mode]}
+			content={coachContent}
+			handleCoachChange={handleCoachChange}
 		/> :
 		mode === 'core values' ?
 		<CoreValues

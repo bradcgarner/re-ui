@@ -13,12 +13,15 @@ export default function TableList(props) {
 	const {
 		goToMainMenu,
 		openItem,
-		openKey,
+		idKey,
 		items,
 		vLItemsHash,
 		vpAppStatusHash,
 		coreValues,
 		formatPresetStyle,
+		handleContactSearch,
+		contactNameSearch,
+		contactNoteSearch,
 		listVPCategories,
 		formatStyle,
 		theFields,
@@ -26,6 +29,20 @@ export default function TableList(props) {
 		modePrior,
 		mode,
 	} = props;
+
+	const isContactMode = mode === 'contacts' || mode === 'vps';
+
+	const itemsFiltered = !isContactMode ? items :
+		!contactNameSearch && !contactNoteSearch ? items :
+		contactNameSearch ? 
+		items.filter(item=>{
+			const theName = typeof item.contactNameCompany === 'string' ? item.contactNameCompany.toLowerCase() : '';
+			return theName.includes(contactNameSearch);
+		}) :
+		items.filter(item=>{
+			const theName = typeof item.contactNotes === 'string' ? item.contactNotes.toLowerCase() : '';
+			return theName.includes(contactNoteSearch);
+		});
 
 	const _listVPCategories = typeof listVPCategories === 'function' ? listVPCategories : ()=>{};
 
@@ -42,11 +59,11 @@ export default function TableList(props) {
 	const dims = calcMinimumWindowDimensions(window);
 	const widthOuter = isPrimitiveNumber(dims.cssWidthOuter) ? dims.cssWidthOuter : 430;
 	const hundreds = precisionRound(widthOuter/100, 0);
-	const max = openKey === 'id_contact' && hundreds <= 5 ? 1 : hundreds <= 5 ? hundreds - 1 : hundreds <= 10 ? hundreds : 20;
+	const max = idKey === 'id_contact' && hundreds <= 5 ? 1 : hundreds <= 5 ? hundreds - 1 : hundreds <= 10 ? hundreds : 20;
 
 	const fields = Array.isArray(theFields) ? theFields.filter((f,i)=>{
 		return i<= max;
-	}) : theFields;
+	}) : [] ;
 
 	const coreValuesHash = {};
 	if(Array.isArray(coreValues)){
@@ -90,6 +107,24 @@ export default function TableList(props) {
 				</div> : null
 		}
 
+		{
+			isContactMode ? 
+			<div className='g1'>
+				<label className='label3'>
+					Search Name and Company
+					<input className='input3'
+						value={contactNameSearch || ''}
+						onChange={e=>handleContactSearch('name', e.target.value)}/>
+				</label>
+				<label className='label3'>
+					Search Notes
+					<input className='input3'
+						value={contactNoteSearch || ''}
+						onChange={e=>handleContactSearch('notes', e.target.value)}/>
+				</label>
+			</div> : null 
+		}
+
 		<table>
 			<thead>
 				<tr className='table-list-thr'>
@@ -103,8 +138,8 @@ export default function TableList(props) {
 			</thead>
 			<tbody>
 				{
-					items.map((a,i)=>{
-						return <tr key={i} className='table-list-tr' onClick={()=>openItem(a[openKey])}>
+					itemsFiltered.map((a,i)=>{
+						return <tr key={i} className='table-list-tr' onClick={()=>openItem(a[idKey])}>
 							{
 								fields.map((f,i)=>{
 									const value = f.limit && typeof a[f.fieldName] === 'string' ? a[f.fieldName].slice(0,f.limit) : a[f.fieldName];
@@ -120,7 +155,11 @@ export default function TableList(props) {
 										f.fd === 'vl' ? formatPresetStyle : 
 										f.fd === 'vp' ? formatVpAppStatusStyle :
 										formatStyle;
-									return <td key={i} className={`table-list-td table-column-${f.fieldName}`} style={fs(value)}>{fd}</td>
+									return <td key={i} 
+										className={`table-list-td table-column-${f.fieldName}`} 
+										style={fs(value)}>
+											{fd}
+										</td>
 								})
 							}
 						</tr>
