@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Instructions from './999-instructions';
 import IncomeGraph from './8-income-graph';
+import Controls from './99-controls';
 
 export default function Income(props) {
 
