@@ -208,7 +208,7 @@ export default function Deal(props) {
 				text={`Enter all relevant notes, motivations, conditions, obstacles, fears, wants, needs, and desires.`}/>
 
 			<DevNotes show={showDevNotes}
-				text={`id_agent {d.id_agent}; id_deal {d.id_deal}; id_deal_temp {d.id_deal_temp}; id_ad {d.id_ad};`} />
+				text={`id_agent ${d.id_agent}; id_deal ${d.id_deal}; id_deal_temp ${d.id_deal_temp}; id_ad ${d.id_ad};`} />
 				
 		</div>
 

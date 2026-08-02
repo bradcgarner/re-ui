@@ -17,6 +17,7 @@ export default function TableList(props) {
 		items,
 		vLItemsHash,
 		vpAppStatusHash,
+		contactsHash,
 		coreValues,
 		formatPresetStyle,
 		handleContactSearch,
@@ -28,6 +29,9 @@ export default function TableList(props) {
 		header,
 		modePrior,
 		mode,
+		initiateReferral,
+		createNewActivity,
+		createNewDailyPlan,
 	} = props;
 
 	const isContactMode = mode === 'contacts' || mode === 'vps';
@@ -82,6 +86,14 @@ export default function TableList(props) {
 		const vl = coreValuesHash[`${v}`] || {};
 		return vl.cv_label || v;
 	};
+	const getContactValue = v => {
+		const ch = contactsHash || {};
+		const ct = ch[`${v}`];
+		if(!ct){
+			return '';
+		}
+		return `${ct.contact_name_first} ${ct.contact_name_last} ${ct.contact_company}`;
+	};
 	const getVendorPartnerAppStatus = v => {
 		const vl = vpAppStatusHash[`${v}`] || {};
 		return vl.label || v;
@@ -106,10 +118,24 @@ export default function TableList(props) {
 					<p className='button2-text'>Back To List VP Categories</p>
 				</div> : null
 		}
-
+		{
+			mode === 'activities' ?
+				<div onClick={()=>createNewActivity()} className='button2'>
+					<p className='button2-text'>Log Activity</p>
+				</div> : null
+		}
+		{
+			mode === 'daily-plans' ?
+				<div onClick={()=>createNewDailyPlan()} className='button2'>
+					<p className='button2-text'>Log Daily Plan</p>
+				</div> : null
+		}
 		{
 			isContactMode ? 
 			<div className='g1'>
+				<div onClick={()=>initiateReferral()} className='button2'>
+					<p className='button2-text'>Go To Referral Screen</p>
+				</div>
 				<label className='label3'>
 					Search Name and Company
 					<input className='input3'
@@ -147,6 +173,7 @@ export default function TableList(props) {
 										f.fd === 'vl' ? getValueListValue(value) : 
 										f.fd === 'date' ? printDate(value) : 
 										f.fd === 'cv' ? getCoreValueListValue(value) : 
+										f.fd === 'ct' ? getContactValue(value) : 
 										f.fd === 'vp' ? getVendorPartnerAppStatus(value) :
 										f.fd === 'dollar' ? printDollar(value) : 
 										f.fd === 'pct' ? printPct(value) : 

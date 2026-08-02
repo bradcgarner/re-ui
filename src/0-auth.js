@@ -246,6 +246,11 @@ useEffect(()=> {
 				width: ${w2}px;
 				margin-bottom: 1vh;
 			}
+			.g2-sub {
+				flex-direction: column;
+				width: ${w2}px;
+				margin-bottom: 1vh;
+			}
 			.g2-box {
 				border: 1px solid ${colorsHash.good2};
 				border-radius: 10px;
@@ -432,8 +437,10 @@ useEffect(()=> {
 				margin-bottom: 10px;
 			}
 
-			.label3,
-			.label2 {
+			.label1,
+			.label2,
+			.label3
+			 {
 				display: flex;
 				flex-direction: column;
 				margin-bottom: 7px;
@@ -442,6 +449,9 @@ useEffect(()=> {
 			}
 			.label-white {
 				color: white;
+			}
+			.label1 {
+				width: ${w1}px;
 			}
 			.label2 {
 				width: ${w2}px;

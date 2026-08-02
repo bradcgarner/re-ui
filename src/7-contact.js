@@ -38,6 +38,10 @@ export default function Contact(props) {
 		referralBasket,
 		// mode,
 		contactsHash,
+		vpAppEmailPreview,
+		initiateVpAppCompletion,
+		processVPReferences,
+		vpAppStatusHash,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);
@@ -48,27 +52,28 @@ export default function Contact(props) {
 	const deals = Array.isArray(c.deals) ? c.deals : [];
 
 	const contactOptions = !c.contactFilter ? optionsHash.contact :
-	Array.isArray(optionsHash.contact) && typeof c.contactFilter === 'string' ? 
-	optionsHash.contact.filter((o,i)=>{
-		if(i===0){return true;}
-		if(o.props && 
-			typeof o.props.children === 'string' && 
-			o.props.children[0] === c.contactFilter.toUpperCase()){
-			return true;
-		}
-		return false;
-	}) : optionsHash.contact;
+		Array.isArray(optionsHash.contact) && typeof c.contactFilter === 'string' ? 
+		optionsHash.contact.filter((o,i)=>{
+			if(i===0){return true;}
+			if(o.props && 
+				typeof o.props.children === 'string' && 
+				o.props.children[0] === c.contactFilter.toUpperCase()){
+				return true;
+			}
+			return false;
+		}) : optionsHash.contact;
 
 	// 'not sent', 'sent', 'review', 'active', null (not a VP), false (denied or declined)
 	const isAVP = vpBinaryHash[`${c.contact_vp_status}`];
 
 	const vpApp = contact.vp_app || {};
 	const vpAppExists = !!vpApp.id_vp_app;
-	const vpAppStatusHash = vpApp.vpAppStatusHash || {};
 	const vpAppStatus = vpApp.vp_app_status || 0;
 	const vpAppStatusData = vpAppStatusHash[`${vpAppStatus}`] || {};
 	const vpAppStatusLabel = vpAppStatusData.label || '';
 	const vpAppLink = `${process.env.REACT_APP_VP_APP_URL}${vpApp.vp_temp_id}`;
+	const v = vpAppEmailPreview;
+	const vpAppEmailPreviewExists = Object.keys(vpAppEmailPreview).length > 0;
 
 	const vpRefs = Array.isArray(contact.vp_refs) ? contact.vp_refs : [];
 	const vpRefsExist = vpRefs.length > 0;
@@ -79,7 +84,6 @@ export default function Contact(props) {
 	const toggleReferralInclude = () => {
 		return handleReferralBasket('include',c.id_contact);
 	};
-
 
 	const remindMe = <p className='gentle-reminder'>{c.contact_name_first} {c.contact_name_last} {c.contact_company}</p>
 
@@ -239,13 +243,13 @@ export default function Contact(props) {
 				vpAppStatusLabel === 'Returned - Review Not Started Yet' ?
 					<div onClick={()=>markVPAppInReview()} className='button4 button-with-margin'>
 						<p className='button2-text'>
-							Mark Review As Started (Lock App For Editing)
+							Start Review / Lock App (Scroll Down)
 						</p>
 					</div> : 
 				vpAppStatusLabel === 'In Review' ?
-					<div onClick={()=>markVPAppComplete()} className='button4 button-with-margin'>
+					<div onClick={()=>initiateVpAppCompletion()} className='button4 button-with-margin'>
 						<p className='button2-text'>
-							Mark Review As Complete (Start Referring)
+							Initiate Completion (Scroll Down)
 						</p>
 					</div> : 
 				vpAppStatusLabel === 'Accepted / Active' ?
@@ -299,6 +303,18 @@ export default function Contact(props) {
 				<div className='g2 g2-box g2-app'>
 		
 					<p className='p1 label-white'>Application Status: {vpAppStatusLabel}</p>
+					{
+						showDevNotes ? <div className='g2'>
+							<p className='p1 label3 label-white'>ID: {vpApp.id_vp_app}</p>
+							<p className='p1 label3 label-white'>Temp id: {vpApp.vp_temp_id || 'NONE'}</p>
+							<p className='p1 label3 label-white'>Sent: {convertTimestampToString(vpApp.ts_sent, 'yyyy-mm-dd')}</p>
+							<p className='p1 label3 label-white'>Re-Opened: {convertTimestampToString(vpApp.ts_open, 'yyyy-mm-dd')}</p>
+							<p className='p1 label3 label-white'>Review: {convertTimestampToString(vpApp.ts_review, 'yyyy-mm-dd')}</p>
+							<p className='p1 label3 label-white'>Active: {convertTimestampToString(vpApp.ts_active, 'yyyy-mm-dd')}</p>
+							<p className='p1 label3 label-white'>Declined: {convertTimestampToString(vpApp.ts_decline, 'yyyy-mm-dd')}</p>
+						</div>:
+						null
+					}
 					<p>&nbsp;</p>
 
 					<label className='label3 label-white'>
@@ -432,6 +448,57 @@ export default function Contact(props) {
 						})
 					}
 				</div> : null 
+		}
+
+		{
+			isAVP && vpRefsExist && vpAppStatusLabel === 'In Review' ?
+			<div onClick={()=>processVPReferences(contact.id_contact)} className='button2'>
+				<p className='button4-text'>
+					Create Connections and Follow-Ups For All 3 VP References
+				</p>
+			</div> : null
+		}
+
+		{
+			vpAppStatusLabel === 'In Review'  && vpAppEmailPreviewExists ?
+				<div className='g2 g2-box g2-app'>
+					<p className='label-white'>{v.sal} {v.name},</p>
+					<br/>
+					<p className='label-white'>{v.message}</p>
+					<br/>
+					<p className='label-white' style={{fontWeight: 'bold'}}>{v.co}</p>
+					<p className='label-white'>{v.cat}</p>
+					<p className='label-white'>{v.area}</p>
+					<p className='label-white'>{v.poc}</p>
+					<p className='label-white'>{v.ph}</p>
+					<p className='label-white'>{v.em}</p>
+					<p className='label-white'>{v.addr}</p>
+					<p className='label-white'>{v.url}</p>
+
+					<p>&nbsp;</p>
+					<p className='label-white'>REFERENCES FOR {v.co.toUpperCase()}:</p>{
+						Array.isArray(v.vp_refs) ? v.vp_refs.map((x,l)=>{
+							return <div key={l} className='g2'>
+								<p className='label-white p4'>{x.rev}</p>
+								<p className='label-white p4 p4-right'>- {x.by}</p>
+							</div>
+						}) : null
+					}
+					<p className='label-white'>{v.rev} <a href={v.revUrl} target="_blank" rel="noreferrer">{v.revUrl}</a></p>
+								
+					<br/>
+
+					<p className='label-white'>{v.note}</p>
+						
+				</div> : null
+		}
+		{
+			vpAppStatusLabel === 'In Review'  && vpAppEmailPreviewExists ?
+				<div onClick={()=>markVPAppComplete()} className='button4 button-with-margin'>
+					<p className='button2-text'>
+						Email VP and Mark App Complete
+					</p>
+				</div> : null
 		}
 
 		<div className='divider'/>

@@ -29,18 +29,21 @@ import { colorsHash } from './0-colors';
 import VPCategories from './7-vp-categories';
 import { convertStringToTimestamp } from 'conjunction-junction/build/date-time';
 import Referral from './7-referral';
+import VPApp from './7-vp-app';
+import VPAppInternalWidget from './7-vp-app-widget';
 
 const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
 function App2(props) {
 
 	const {
+		vlStatic,
 		screenType,
 		id_agent,
 		inputFormatOptions,
 		tempIdKeys,
 		optionsHash,
-		dealStatusHash,
+		convoDealFoundHash,
 		commissionHash,
 		vLItemsHash,
 		vLGroupsHash,
@@ -48,6 +51,7 @@ function App2(props) {
 		vpReferenceHash,
 		vpReferenceConstant,
 		vpShowApplicationHash,
+		vpAppStatusHash,
 		vpBinaryHash,
 		dealFoundHash,
 		dealsHash,
@@ -86,15 +90,20 @@ function App2(props) {
 	const [contactNoteSearch, setContactNoteSearch] = useState('');
 
 	const [vps, setVPs] = useState([]);
-	const [vpSearch, setVpSearch] = useState('');
+	const [vpApps, setVPApps] = useState([]);
+	const [vpApp, setVPApp] = useState({vp_app_status: 0});
 	
+	const [submitVPAppAttempted, setSubmitVPAppAttempted] = useState(false);
+	const [vpAppValidationKeys, setVPAppValidationKeys] = useState({});
+
 	const [vpGroupHash, setVPGroupHash] = useState({});
-	const [vpAppStatusHash, setVpAppStatusHash] = useState({});
 	const [contactVPApp, setContactVPApp] = useState({});
 	const [missingVPData, setMissingVPData] = useState([]);
+	const [vpAppEmailPreview, setVpAppEmailPreview] = useState({});
 
 	const [referralBasket, setReferralBasket] = useState({});
 	const [vpReferrals, setVPReferrals] = useState({});
+	const [vpReferralSent, setVPReferralSent] = useState(false);
 
 	const [deals, setDeals] = useState([]);
 	const [deal, setDeal] = useState({});
@@ -248,14 +257,14 @@ function App2(props) {
 	const createNewDailyPlan = () => {
 		setMode('daily-plan');
 		setFus([]); // to avoid them loading by default as the full list in the daily plan
-		const today = new Date();
+		const dateToday = new Date();
 		const newDP = {
 			id_agent,
 			date_dp: {
-				date_dp_year: today.getFullYear(),
-				date_dp_month: today.getMonth(),
-				date_dp_day: today.getDate(),
-				date_dp_timestamp: today,
+				date_dp_year: dateToday.getFullYear(),
+				date_dp_month: dateToday.getMonth(),
+				date_dp_day: dateToday.getDate(),
+				date_dp_timestamp: dateToday,
 			},
 		}
 		setDailyPlan(newDP);
@@ -428,6 +437,146 @@ function App2(props) {
 		setMode('activity');
 	};
 
+	const logReferralActivity = () => {
+		const dateToday = new Date();
+		const r = Array.isArray(vpReferrals) ? vpReferrals[0] || {} : {} ;
+		let convo_notes = `${r.sal} ${r.names}
+${r.message}
+-------
+${r.name}
+${r.email || ''}
+${r.phone || ''}
+-------
+`;
+						
+		if(Array.isArray(r.vps)){
+			r.vps.forEach(f=>{
+				convo_notes += `${f.co}
+${f.cat}
+${f.area}
+${f.poc}
+${f.ph}
+${f.em}
+${f.url || 'no website'}
+
+REFERENCES FOR ${f.co.toUpperCase()}:
+`;
+					
+					if(Array.isArray(f.vp_refs)){
+						f.vp_refs.forEach(x=>{
+							convo_notes += `${x.rev}
+- ${x.by}
+`;
+						});
+					}
+				convo_notes += `
+${f.rev} ${f.revUrl}.
+`;
+	
+			});
+			convo_notes += `
+${r.note}`;
+		}
+
+		const newActivity = {
+			id_agent,
+			id_activity_temp: convertTimestampToString(dateToday, 'd t z'),
+			date_convo: {
+				date_convo_year: dateToday.getFullYear(),
+				date_convo_month: dateToday.getMonth(),
+				date_convo_day: dateToday.getDate(),
+				date_convo_timestamp: dateToday,
+				dateString: convertTimestampToString(dateToday,'dow d M y'),
+			},
+			fu_notes: '',
+			convo_relationship: vlStatic.convoRelationVP,
+			convo_main_purpose: vlStatic.convoPurposeVPReferral,
+			convo_method: vlStatic.convoMethodEmail,
+			convo_tone: vlStatic.convoToneProfessional,
+			convo_model: vlStatic.vpReferralModel,
+			convo_intentional: vlStatic.convoIntentional,
+			convo_type: vlStatic.convoTypeLeadFU,
+			convo_voice_note: vlStatic.convoVoiceNoteNone,
+			convo_outcome: vlStatic.rankingOK,
+			convo_problem_solve: vlStatic.convoProblemSolveVP,
+			convo_notes,
+			convo_deal_found: vlStatic.convoDealFoundNoAsk,
+			contacts: [],
+			connections: [],
+			deals: [],
+			fus: [],
+		};
+
+		const rbTo = referralBasket.to || {};
+		const rbIncl = referralBasket.include || {};
+
+		const rbToIds = Object.keys(rbTo);
+		const rbInclIds = Object.keys(rbIncl);
+		const allIds = [...rbToIds, ...rbInclIds];
+
+		allIds.forEach((id,i)=>{
+			const id_contact = parseInt(id, 10);
+			const contactFound = contactsHash[`${id_contact}`];
+			if(contactFound){
+				const id_contact_temp = `${newActivity.id_activity_temp}-main-${i}`;
+				const newContact = {
+					id_agent,
+					id_contact,
+					id_who_introduced: null,
+					id_who_introduced_temp: null,
+					id_activity: activity.id_activity || null,
+					id_activity_temp: `${activity.id_activity_temp}-X`,
+					contact_how_met: null,
+					contact_where_met: null,
+					contact_where_met_notes: null,
+					contact_notes: '',
+					contact_name_first: null,
+					contact_name_last: null,
+					contact_phone: null,
+					contact_email: null,
+					contact_vp_categories: null,
+					contact_vp_areas: null,
+					contact_vp_status: vlStatic.contactVPStatusNo,
+					connection_record_type: 'main',
+				};
+				for(let x in contactFound){
+					newContact[x] = contactFound[x];
+				}
+				if(!newContact.id_contact_temp){
+					newContact.id_contact_temp = id_contact_temp;
+				}
+				newActivity.contacts.push(newContact);
+
+				const dateFU = addTime(dateToday, 14, 'days');
+				const date_fu = {
+					date_fu_year: dateFU.getFullYear(),
+					date_fu_month: dateFU.getMonth(),
+					date_fu_day: dateFU.getDate(),
+					dateString: convertTimestampToString(dateFU,'dow d M y'),
+					date_fu_timestamp: dateFU,
+				};
+				const newFu = {
+					id_agent,
+					id_activity_fu: null,
+					id_activity_temp: `${newActivity.id_activity_temp}-X`,
+					id_deal_fu: null,
+					id_deal_fu_temp: null,
+					id_contact_fu: id_contact,
+					id_contact_fu_temp: newContact.id_contact_temp,
+					date_fu,
+					fu_purpose: vlStatic.convoPurposeVPCheckIn,
+					fu_notes: `Check on outcome of connection between ${r.names}`,
+				};
+				newActivity.fus.push(newFu);
+
+			}
+		});
+
+		setActivity(newActivity);
+		setMode('activity');
+		scrollToTop();
+	};
+
 	const doFollowUp = () => {
 		const newActivity = JSON.parse(JSON.stringify(activity));
 		const dateToday = new Date();
@@ -441,7 +590,17 @@ function App2(props) {
 		};
 		newActivity.convo_main_purpose = newActivity.fu_purpose;
 		newActivity.convo_notes = newActivity.fu_notes;
-		newActivity.convo_deal_found = 75;
+
+		if(newActivity.convo_main_purpose === vlStatic.convoPurposeVPRefCheck){
+			newActivity.convo_relationship = vlStatic.convoRelVPRefCheck;
+			newActivity.convo_deal_found = vlStatic.convoDealFoundNoAsk;
+			newActivity.convo_model = vlStatic.convoModelVPRefCheck;
+			newActivity.convo_tone = vlStatic.convoToneCasual;
+			newActivity.convo_type = vlStatic.convoTypeLeadGen;
+			newActivity.convo_intentional = vlStatic.convoIntentional;
+		} else {
+			newActivity.convo_deal_found = vlStatic.convoDealFoundUpdate;
+		}
 
 		// addContactToActivity
 		const connection_record_type = 'main';
@@ -473,7 +632,7 @@ function App2(props) {
 			contact_email: null,
 			contact_vp_categories: null,
 			contact_vp_areas: null,
-			contact_vp_status: null,
+			contact_vp_status: vlStatic.contactVPStatusNo,
 			connection_record_type,
 		};
 
@@ -492,52 +651,54 @@ function App2(props) {
 		if(!Array.isArray(newActivity.deals)){
 			newActivity.deals = [];
 		}
-		const dealIndex = newActivity.deals.length;
+		if(newActivity.convo_deal_found === vlStatic.convoDealFoundUpdate){
+			const dealIndex = newActivity.deals.length;
 
-		const newDeal = {
-			id_agent,
-			id_deal: newActivity.id_deal_fu,
-			id_activity: activity.id_activity || null,
-			id_activity_temp: `${activity.id_activity_temp}-X`,
-			id_deal_temp: `${activity.id_activity_temp}-deal-${dealIndex}`,
-			deal_name: '',
-			deal_address: '',
-			deal_how_found: null,
-			deal_how_found_categ: null,
-			deal_trigger: null,
-			deal_type: null,
-			deal_stage: null,
-			deal_timeline_stated: null,
-			deal_timeline_status: null,
-			date_deal: {
-				date_deal_year: null,
-				date_deal_month: null,
-				date_deal_day: null,
-			},
-			deal_value: null,
-			deal_value_status: null,
-			deal_commission_rate: null,
-			deal_gci: null,
-			deal_notes: '',
-		};
+			const newDeal = {
+				id_agent,
+				id_deal: newActivity.id_deal_fu,
+				id_activity: activity.id_activity || null,
+				id_activity_temp: `${activity.id_activity_temp}-X`,
+				id_deal_temp: `${activity.id_activity_temp}-deal-${dealIndex}`,
+				deal_name: '',
+				deal_address: '',
+				deal_how_found: null,
+				deal_how_found_categ: null,
+				deal_trigger: null,
+				deal_type: null,
+				deal_stage: null,
+				deal_timeline_stated: null,
+				deal_timeline_status: null,
+				date_deal: {
+					date_deal_year: null,
+					date_deal_month: null,
+					date_deal_day: null,
+				},
+				deal_value: null,
+				deal_value_status: null,
+				deal_commission_rate: null,
+				deal_gci: null,
+				deal_notes: '',
+			};
 
-		const dealFound = dealsHash[`${newDeal.id_deal}`];
-		const dealDateFields = {
-			date_deal_year: true,
-			date_deal_month: true,
-			date_deal_day: true,
-			date_deal_timestamp: true,
-		};
-		if(dealFound){
-			for(let x in dealFound){
-				if(dealDateFields[x]){
-					newDeal.date_deal[x] = dealFound[x];
-				} else {
-					newDeal[x] = dealFound[x];
+			const dealFound = dealsHash[`${newDeal.id_deal}`];
+			const dealDateFields = {
+				date_deal_year: true,
+				date_deal_month: true,
+				date_deal_day: true,
+				date_deal_timestamp: true,
+			};
+			if(dealFound){
+				for(let x in dealFound){
+					if(dealDateFields[x]){
+						newDeal.date_deal[x] = dealFound[x];
+					} else {
+						newDeal[x] = dealFound[x];
+					}
 				}
 			}
+			newActivity.deals.push(newDeal);
 		}
-		newActivity.deals.push(newDeal);
 
 		setActivity(newActivity);
 	};
@@ -750,8 +911,8 @@ function App2(props) {
 					} else if(isADealTimeline){
 						const dealTimelineValueFound = vLItemsHash[`${newActivity[one][index][two]}`];
 						if(dealTimelineValueFound && isPrimitiveNumber(dealTimelineValueFound.value)){
-							const today = new Date();
-							const later = addTime(today, dealTimelineValueFound.value * 30, 'days');
+							const dateToday = new Date();
+							const later = addTime(dateToday, dealTimelineValueFound.value * 30, 'days');
 							const y = later.getFullYear();
 							const m = later.getMonth();
 							if(!newActivity[one][index].date_deal){
@@ -903,7 +1064,7 @@ function App2(props) {
 			contact_email: null,
 			contact_vp_categories: null,
 			contact_vp_areas: null,
-			contact_vp_status: null,
+			contact_vp_status: vlStatic.contactVPStatusNo,
 			connection_record_type,
 		};
 		if(connection_record_type === 'connection'){
@@ -966,7 +1127,39 @@ function App2(props) {
 
 	const processVPReferences = () => {
 
-		const newActivity = JSON.parse(JSON.stringify(activity));
+		const vpa = mode === 'contact' ? contact.vp_app :
+			mode === 'activity' ? contactVPApp : {};
+		const dateToday = new Date();
+
+		const newActivity = mode === 'activity' ? JSON.parse(JSON.stringify(activity)) :
+		{
+			id_agent,
+			id_activity_temp: convertTimestampToString(new Date(), 'd t z'),
+			date_convo: {
+				date_convo_year: dateToday.getFullYear(),
+				date_convo_month: dateToday.getMonth(),
+				date_convo_day: dateToday.getDate(),
+				date_convo_timestamp: dateToday,
+				dateString: convertTimestampToString(dateToday,'dow d M y'),
+			},
+			fu_notes: '',
+			convo_relationship: vlStatic.convoRelationVP,
+			convo_main_purpose: vlStatic.convoPurposeVPAppFU,
+			convo_method: vlStatic.convoMethodEmail,
+			convo_tone: vlStatic.convoToneProfessional,
+			convo_model: vlStatic.convoModelNone,
+			convo_intentional: vlStatic.convoNotIntentional,
+			convo_type: vlStatic.convoTypeLeadFU,
+			convo_voice_note: vlStatic.convoVoiceNoteNone,
+			convo_problem_solve: vlStatic.convoProblemSolveNone,
+			convo_notes: 'This is an auto-created activity to follow-up with VP references.',
+			convo_deal_found: vlStatic.convoDealFoundNoAsk,
+			convo_outcome: vlStatic.rankingOK,
+			contacts: [],
+			connections: [],
+			deals: [],
+			fus: [],
+		};
 		if(!Array.isArray(newActivity.connections)){
 			newActivity.connections = [];
 		}
@@ -977,7 +1170,14 @@ function App2(props) {
 			newActivity.fus = [];
 		}
 
-		const id_vp_app = contactVPApp.id_vp_app;
+		if(mode === 'contact'){
+			newActivity.contacts.push({
+				...contact, 
+				connection_record_type: 'main',
+			});
+		}
+		
+		const id_vp_app = vpa.id_vp_app;
 		if(!id_vp_app){
 			console.error('could not find id_vp_app, aborting');
 			return;
@@ -1011,8 +1211,8 @@ function App2(props) {
 			id_who_introduced_temp: null,
 			id_activity: activity.id_activity || null,
 			id_activity_temp: `${activity.id_activity_temp}-X`,
-			contact_how_met: 14,
-			contact_where_met: 227,
+			contact_how_met: vlStatic.contactHowMetVPRef,
+			contact_where_met: vlStatic.contactWhereMetVPRef,
 			contact_where_met_notes: `Submitted as a reference by ${vp.contact_name_first} ${vp.contact_name_last} of ${vp.contact_company}`,
 			contact_notes: '',
 			contact_name_first: '',
@@ -1022,28 +1222,27 @@ function App2(props) {
 			contact_vp_categories: null,
 			contact_vp_areas: null,
 			connection_vp_reference: '',
-			contact_vp_status: 170,
-			connection_type: 159,
+			contact_vp_status: vlStatic.contactVPStatusNo,
+			connection_type: vlStatic.connTypeVPRef,
 			connection_record_type,
 		};
 		const newContact1 = {
 			...newContact,
 			id_contact_temp: id_contact_temp1,
-			connection_notes: contactVPApp.vp_ref1,
+			connection_notes: vpa.vp_ref1,
 		};
 		const newContact2 = {
 			...newContact,
 			id_contact_temp: id_contact_temp2,
-			connection_notes: contactVPApp.vp_ref2,
+			connection_notes: vpa.vp_ref2,
 		};
 		const newContact3 = {
 			...newContact,
 			id_contact_temp: id_contact_temp3,
-			connection_notes: contactVPApp.vp_ref3,
+			connection_notes: vpa.vp_ref3,
 		};
 
-		const today = new Date();
-		const date2 = addTime(today, 1, 'days');
+		const date2 = addTime(dateToday, 1, 'days');
 		const newFu = {
 			id_agent: activity.id_agent || id_agent,
 			id_activity_fu: activity.id_activity || null,
@@ -1065,17 +1264,17 @@ function App2(props) {
 		const newFu1 = {
 			...newFu,
 			id_contact_fu_temp: id_contact_temp1,
-			fu_notes: `${newFu.fu_notes} ${contactVPApp.vp_ref1}`
+			fu_notes: `${newFu.fu_notes} ${vpa.vp_ref1}`
 		};
 		const newFu2 = {
 			...newFu,
 			id_contact_fu_temp: id_contact_temp2,
-			fu_notes: `${newFu.fu_notes} ${contactVPApp.vp_ref2}`
+			fu_notes: `${newFu.fu_notes} ${vpa.vp_ref2}`
 		};
 		const newFu3 = {
 			...newFu,
 			id_contact_fu_temp: id_contact_temp3,
-			fu_notes: `${newFu.fu_notes} ${contactVPApp.vp_ref3}`
+			fu_notes: `${newFu.fu_notes} ${vpa.vp_ref3}`
 		};
 
 		newActivity.connections.push(newContact1);
@@ -1086,6 +1285,11 @@ function App2(props) {
 		newActivity.fus.push(newFu3);
 
 		setActivity(newActivity);
+
+		if(mode === 'contact'){
+			setMode('activity');
+			scrollToTop();
+		}
 		
 	};
 
@@ -1202,11 +1406,12 @@ function App2(props) {
 				return res.json();
 			})
 			.then(r=>{
-				const vendorPartners = r && Array.isArray(r.vps) ? r.vps : [];
-
+				const vendorPartners = r && Array.isArray(r.vps) ? r.vps.map(a=>{
+					const hydratedFields = hydrateContact(a);
+					return {...a, ...hydratedFields};
+				}) : [];
 				if(Array.isArray(vendorPartners)){
 					setVPs(vendorPartners);
-					setVpAppStatusHash(r.vpAppStatusHash);
 					setMode('vps');
 					scrollToTop();
 				}
@@ -1237,6 +1442,27 @@ function App2(props) {
 				console.error(err);
 			});
 	};
+
+	const listVPApps = () => {
+		setIsLoading(true);
+		const init = {
+			method: 'GET',
+			headers: {Authorization: `Bearer ${localStorage.authToken}`},
+		};
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-apps`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setVPApps(r);
+				setMode('vp-apps');
+				setIsLoading(false);
+				scrollToTop();
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	}
 
 	const openContact = id_contact => {
 
@@ -1345,7 +1571,7 @@ function App2(props) {
 			},
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/contacts/vp-app/${id_contact}`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app-contact/${id_contact}`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1420,7 +1646,7 @@ function App2(props) {
 			body: JSON.stringify(vp),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/contacts/send-vp-app`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app-send`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1459,7 +1685,7 @@ function App2(props) {
 			body: JSON.stringify(vp),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/contacts/review-vp-app`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app-review`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1470,6 +1696,38 @@ function App2(props) {
 			.catch(err=>{
 				console.error(err);
 			});
+	};
+
+	const initiateVpAppCompletion = () => {
+		const title = contact.contact_title ? `, ${contact.contact_title}` : '';
+		const vp_refs = Array.isArray(contact.vp_refs) ? contact.vp_refs.map(r=>{
+			const byC = contactsHash[`${r.id_contact_fu}`] || {};
+			return {
+				rev: r.convo_vp_ref || '',
+				by: `${byC.contact_name_first} ${byC.contact_address_city || ''} ${byC.contact_address_state || ''}`,
+			};
+		}): [];
+		const cat = Array.isArray(contact.contact_vp_categories) ? `Services: ${contact.contact_vp_categories.join(', ')}` : '';
+		const area = Array.isArray(contact.contact_vp_areas) ? `Areas Served: ${contact.contact_vp_areas.join(', ')}` : '';
+						
+		const newVpAppEmailPreview = {
+			sal: 'Hi',
+			name: contact.contact_name_first,
+			message: `Thank you so much for your participation in our Vendor Referral Program! Your application is complete, and I'll do my best to refer business to you and soon. When I find a need, I'll check with you to confirm you can accept the referral, and then I will connect you with a customer via a 3-way email. The information I have to refer you is below. Please let me know if I got anything wrong.`,
+			co: contact.contact_company,
+			poc: `Contact: ${contact.contact_name_first} ${contact.contact_name_last}${title}`,
+			ph: contact.contact_phone,
+			em: contact.contact_email,
+			url: contact.contact_url,
+			addr: `${contact.contact_address_street}, ${contact.contact_address_city}, ${contact.contact_address_state}`,
+			cat,
+			area,
+			rev: `If you're happy with ${contact.contact_company}'s services, please leave a great review at`,
+			revUrl: contact.contact_review_url,
+			note: 'Thanks again! I look forward to a prosperous relationship.',
+			vp_refs,
+		};
+		setVpAppEmailPreview(newVpAppEmailPreview);
 	};
 
 	const markVPAppComplete = () => {
@@ -1495,16 +1753,17 @@ function App2(props) {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${localStorage.authToken}`,
 			},
-			body: JSON.stringify(vp),
+			body: JSON.stringify({vp, email: vpAppEmailPreview}),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/contacts/activate-vp`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app-activate`, init)
 			.then(res=>{
 				return res.json();
 			})
 			.then(r=>{
 				setContact(r);
 				setIsLoading(false);
+				scrollToTop();
 			})
 			.catch(err=>{
 				console.error(err);
@@ -1537,7 +1796,7 @@ function App2(props) {
 			body: JSON.stringify(vp),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/contacts/open-vp-app`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app-returned`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1576,7 +1835,7 @@ function App2(props) {
 			body: JSON.stringify(vp),
 		};
 		setIsLoading(true);
-		fetch(`${REACT_APP_API_URL}api/contacts/decline-vp`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app-decline`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1589,8 +1848,108 @@ function App2(props) {
 			});
 	};
 
+	const openVPApp = id_vp_app => {
+		if(!id_vp_app){
+			return;
+		}
+		const init = {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+		};
+		setIsLoading(true);
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app/${id_vp_app}`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setVPApp(r);
+				setMode('vp-app');
+				setIsLoading(false);
+			})
+	};
+
+	// @@@@@@@@@@@@ VP APP - COPY FROM SUB-PROGRAM @@@@@@@@@@@@@@@
+
+
+	const handleVPAppChange = (k, v) => {
+
+		const newA = JSON.parse(JSON.stringify(vpApp));
+		newA[k] = v;
+		setVPApp(newA);
+	};
+
+	const validateVPApp = () => {
+		const keys = {
+			vp_name_business: true,
+			vp_type: true,
+			vp_contact_person: true,
+			vp_phone: true,
+			vp_email: true,
+			vp_area: true,
+			vp_agree: 'Yes',
+			vp_ref1: true,
+			vp_ref2: true,
+			vp_ref3: true,
+		};
+		let isComplete = true;
+		for(let k in keys){
+			if(keys[k]===true){
+				if(!vpApp[k]){
+					keys[k]=false;
+					isComplete = false;
+				}
+			} else {
+				if(vpApp[k] !== keys[k]){
+					keys[k] = false;
+					isComplete = false;
+				}
+			}
+		}
+		return {
+			isComplete,
+			keys,
+		};
+	};
+
+	const saveVPApp = () => {
+		const {
+			isComplete,
+			keys,
+		} = validateVPApp();
+		setVPAppValidationKeys(keys);
+		setSubmitVPAppAttempted(true);
+		if(!isComplete){
+			// return;
+		}
+
+		setIsLoading(true);
+		const init = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.authToken}`,
+			},
+			body: JSON.stringify(vpApp),
+		};
+		fetch(`${REACT_APP_API_URL}api/contacts/vp-app`, init)
+			.then(res=>{
+				return res.json();
+			})
+			.then(r=>{
+				setVPApp(r);
+				scrollToTop();
+				setIsLoading(false);
+			})
+			.catch(err=>{
+				console.error(err);
+			});
+	};
+
+	// @@@@@@@@@@@@@@@@@ REFERRALS @@@@@@@@@@@@@@@@@@@@
+
 	const handleReferralBasket = (f, id_contact) => {
-		console.log('handleReferralBasket')
 		const newRB = JSON.parse(JSON.stringify(referralBasket));
 		if(!newRB.to){
 			newRB.to = {};
@@ -1622,7 +1981,7 @@ function App2(props) {
 			},
 			body: JSON.stringify(referralBasket),
 		};
-		fetch(`${REACT_APP_API_URL}api/contacts/get-refs`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/refs-get`, init)
 			.then(res=>{
 				return res.json();
 			})
@@ -1630,50 +1989,57 @@ function App2(props) {
 				console.log(rb);
 				const rbTo = rb.to || {};
 				const rbIncl = rb.include || {};
-				const rbInclKeys = Object.keys(rbIncl);
-				const messagePart1 = rbInclKeys.length > 1 ?
-					'The contacts we talked about are below' :
-					'The contact we talked about is below';
 				const referrals = [];
 				for(let k in rbTo){
 					const c = rbTo[k].contact || {};
-					const ref = {
-						addr: c.contact_email,
+					const referral = {
+						subject: 'Referral Introduction',
+						emails: [c.contact_email],
 						sal: 'Hi',
-						dear: c.contact_name_first,
-						message: `${messagePart1}, along with their references. I'll check back to see how things go. Please let me know if you need anything else, real estate or otherwise.`,
-						refs: [],
+						names: [c.contact_name_first],
+
+						name: `${c.contact_name_first} ${c.contact_name_last}`,
+						email: c.contact_email,
+						phone: c.contact_phone,
+
+						message: 'I am so happy to connect you with each other, as promised. Please let me know if you need anything else, real estate or otherwise.',
+						vps: [],
+						note: `I hope this works out great! I'll check back to see how things are going.`,
 					};
 					for(let v in rbIncl){
 						const v1 = rbIncl[v] || {};
-						console.log({v1})
 						const vpC = v1.contact || {};
 						const title = vpC.contact_title ? `, ${vpC.contact_title}` : '';
-						const refs = Array.isArray(v1.refs) ? v1.refs.map(r=>{
+						const vp_refs = Array.isArray(v1.vp_refs) ? v1.vp_refs.map(r=>{
 							const byC = contactsHash[`${r.id_contact_fu}`] || {};
 							return {
 								rev: r.convo_vp_ref || '',
 								by: `${byC.contact_name_first} ${byC.contact_address_city || ''} ${byC.contact_address_state || ''}`,
 							};
 						}): [];
-						console.log({refs, v1Refs: v1.refs})
-						const vRef = {
+						const cat = Array.isArray(vpC.contact_vp_categories) ? `Services: ${vpC.contact_vp_categories.join(', ')}` : '';
+						const area = Array.isArray(vpC.contact_vp_areas) ? `Areas Served: ${vpC.contact_vp_areas.join(', ')}` : '';
+						referral.emails.push(vpC.contact_email);
+						referral.names.push(vpC.contact_name_first);
+						const vp = {
 							co: vpC.contact_company,
-							poc: `${vpC.contact_name_first} ${vpC.contact_name_last}${title}`,
+							poc: `Contact: ${vpC.contact_name_first} ${vpC.contact_name_last}${title}`,
 							ph: vpC.contact_phone,
 							em: vpC.contact_email,
 							url: vpC.contact_url,
 							addr: `${vpC.contact_address_street}, ${vpC.contact_address_city}, ${vpC.contact_address_state}`,
-							cat: Array.isArray(vpC.contact_vp_categories) ? vpC.contact_vp_categories.join(', ') : '',
-							area: Array.isArray(vpC.contact_vp_areas) ? vpC.contact_vp_areas.join(', ') : '',
-							rev: `If you're happy with their services, please leave them a review at`,
+							cat,
+							area,
+							rev: `If you're happy with ${vpC.contact_company}'s services, please leave a great review at`,
 							revUrl: vpC.contact_review_url,
-							refs,
+							vp_refs,
 						};
-						ref.refs.push(vRef);
+						referral.vps.push(vp);
 					}
-					referrals.push(ref);
+					referral.names = referral.names.join(' and ');
+					referrals.push(referral);
 				}
+				setVPReferralSent(false);
 				setVPReferrals(referrals);
 				scrollToTop();
 				setIsLoading(false);
@@ -1682,6 +2048,32 @@ function App2(props) {
 				console.error(err);
 			});
 
+	};
+
+	const editVPReferrals = (i, k1, j, k2, l, k3, v) => {
+		const newRB = JSON.parse(JSON.stringify(vpReferrals));
+		const referral = newRB[i] || {};
+		const loc1 = referral[k1];
+		console.log({i, k1, j, k2, l, k3, v});
+		console.log({referral,loc1})
+		if(typeof loc1 === 'string'){
+			referral[k1] = v;
+			setVPReferrals(newRB);
+			setVPReferralSent(false);
+		} else if(Array.isArray(loc1)){
+			const loc2 = loc1[j] || {};
+			const loc3 = loc2[k2];
+			if(typeof loc3 === 'string'){
+				loc2[k2] = v;
+				setVPReferrals(newRB);
+				setVPReferralSent(false);
+			} else if(Array.isArray(loc3)){
+				const loc4 = loc3[l] || {};
+				loc4[k3] = v;
+				setVPReferrals(newRB);
+				setVPReferralSent(false);
+			}
+		}
 	};
 
 	const sendReferral = () => {
@@ -1694,8 +2086,9 @@ function App2(props) {
 			},
 			body: JSON.stringify(vpReferrals),
 		};
-		fetch(`${REACT_APP_API_URL}api/contacts/send-refs`, init)
+		fetch(`${REACT_APP_API_URL}api/contacts/refs-send`, init)
 			.then(res=>{
+				setVPReferralSent(true);
 				setIsLoading(false);
 				return res.json();
 			})
@@ -1915,6 +2308,17 @@ function App2(props) {
 		return {backgroundColor:colorsHash.good1,color:colorsHash.dark};
 	};
 
+	const vpAppInternalWidget = <VPAppInternalWidget
+		goToMainMenu={goToMainMenu}
+		listVPApps={listVPApps}
+		vpApp={vpApp}
+		modePrior={modePrior}
+		formatStyle={formatStyle}
+		handleVPAppChange={handleVPAppChange}
+		saveVPApp={saveVPApp}
+		optionsHash={optionsHash}
+	/>
+
 	// @@@@@@@@@@@ PRE-LOAD @@@@@@@@@@@
 
 
@@ -1937,6 +2341,7 @@ function App2(props) {
 			listContacts={listContacts}
 			listVPs={listVPs}
 			listVPCategories={listVPCategories}
+			listVPApps={listVPApps}
 			listDeals={listDeals}
 			openProformae={openProformae}
 			getIncomeGraph={getIncomeGraph}
@@ -1970,6 +2375,7 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
+			initiateReferral={initiateReferral}
 			vLItemsHash={vLItemsHash}
 			coreValues={coreValues}
 			proformae={proformae}
@@ -1980,6 +2386,7 @@ function App2(props) {
 			header='DAILY PLANS'
 			items={dailyPlans}
 			theFields={theFields.dailyPlans}
+			createNewDailyPlan={createNewDailyPlan}
 		/> :
 		mode === 'activity' ?
 		<Activity
@@ -2000,11 +2407,12 @@ function App2(props) {
 			openContact={openContact}
 			getContactVPApp={getContactVPApp}
 			openActivity={openActivity}
+			vpAppStatusHash={vpAppStatusHash}
 			contactVPApp={contactVPApp}
 			modePrior={modePrior}
 			activity={activity}
 			optionsHash={optionsHash}
-			dealStatusHash={dealStatusHash}
+			convoDealFoundHash={convoDealFoundHash}
 			vLItemsHash={vLItemsHash}
 			referralHash={referralHash}
 			vpReferenceHash={vpReferenceHash}
@@ -2020,6 +2428,7 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
+			initiateReferral={initiateReferral}
 			vLItemsHash={vLItemsHash}
 			mode={mode}
 			modePrior={modePrior}
@@ -2028,6 +2437,7 @@ function App2(props) {
 			header='ACTIVITIES'
 			items={activities}
 			theFields={theFields.activities}
+			createNewActivity={createNewActivity}
 		/> :
 		mode === 'follow-ups' ?
 		<TableList 
@@ -2035,6 +2445,7 @@ function App2(props) {
 			goToMainMenu={goToMainMenu}
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
+			initiateReferral={initiateReferral}
 			vLItemsHash={vLItemsHash}
 			mode={mode}
 			modePrior={modePrior}
@@ -2053,6 +2464,7 @@ function App2(props) {
 			handleContactSearch={handleContactSearch}
 			contactNameSearch={contactNameSearch}
 			contactNoteSearch={contactNoteSearch}
+			initiateReferral={initiateReferral}
 			vLItemsHash={vLItemsHash}
 			mode={mode}
 			modePrior={modePrior}
@@ -2069,7 +2481,12 @@ function App2(props) {
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
 			vLItemsHash={vLItemsHash}
+			handleContactSearch={handleContactSearch}
+			contactNameSearch={contactNameSearch}
+			contactNoteSearch={contactNoteSearch}
 			vpAppStatusHash={vpAppStatusHash}
+			contactsHash={contactsHash}
+			initiateReferral={initiateReferral}
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openContact}
@@ -2078,6 +2495,38 @@ function App2(props) {
 			header='VENDOR PARTNERS'
 			items={vps}
 			theFields={theFields.vps}
+		/> :
+		mode === 'vp-apps' ?
+		<TableList 
+			screenType={screenType}
+			goToMainMenu={goToMainMenu}
+			formatPresetStyle={formatPresetStyle}
+			formatStyle={formatStyle}
+			vLItemsHash={vLItemsHash}
+			handleContactSearch={handleContactSearch}
+			contactNameSearch={contactNameSearch}
+			contactNoteSearch={contactNoteSearch}
+			vpAppStatusHash={vpAppStatusHash}
+			contactsHash={contactsHash}
+			initiateReferral={initiateReferral}
+			mode={mode}
+			modePrior={modePrior}
+			openItem={openVPApp}
+			listVPCategories={listVPCategories}
+			idKey={'id_vp_app'}
+			header='VENDOR PARTNER APPLICATIONS'
+			items={vpApps}
+			theFields={theFields.vpApps}
+		/> :
+		mode === 'vp-app' ?
+		<VPApp
+			vpApp={vpApp}
+			handleVPAppChange={handleVPAppChange}
+			saveVPApp={saveVPApp}
+			vpAppStatusHash={vpAppStatusHash}
+			vpAppValidationKeys={vpAppValidationKeys}
+			submitVPAppAttempted={submitVPAppAttempted}
+			internalWidget={vpAppInternalWidget}
 		/> :
 		mode === 'vp-categories' ?
 		<VPCategories 
@@ -2107,12 +2556,15 @@ function App2(props) {
 			handleVPAreaSelection={handleVPAreaSelection}
 			openDeal={openDeal}
 			openActivity={openActivity}
+			processVPReferences={processVPReferences}
 			initiateVPApplication={initiateVPApplication}
+			initiateVpAppCompletion={initiateVpAppCompletion}
 			sendVPApplication={sendVPApplication}
 			markVPAppInReview={markVPAppInReview}
 			markVPAppComplete={markVPAppComplete}
 			reOpenVPAppForEditing={reOpenVPAppForEditing}
 			declineVPApp={declineVPApp}
+			vpAppStatusHash={vpAppStatusHash}
 			missingVPData={missingVPData}
 			handleReferralBasket={handleReferralBasket}
 			referralBasket={referralBasket}
@@ -2125,6 +2577,7 @@ function App2(props) {
 			modePrior={modePrior}
 			mode={mode}
 			contactsHash={contactsHash}
+			vpAppEmailPreview={vpAppEmailPreview}
 		/> :
 		mode === 'referral' ?
 		<Referral
@@ -2133,9 +2586,16 @@ function App2(props) {
 			referralBasket={referralBasket}
 			contactsHash={contactsHash}
 			handleReferralBasket={handleReferralBasket}
+			editVPReferrals={editVPReferrals}
 			getReferralInfo={getReferralInfo}
 			sendReferral={sendReferral}
+			listContacts={listContacts}
+			listVPs={listVPs}
+			listVPCategories={listVPCategories}
+			logReferralActivity={logReferralActivity}
+			vpReferralSent={vpReferralSent}
 			vpReferrals={vpReferrals}
+			modePrior={modePrior}
 		/> :
 		mode === 'deals' ?
 		<TableList 
@@ -2144,6 +2604,7 @@ function App2(props) {
 			formatPresetStyle={formatPresetStyle}
 			formatStyle={formatStyle}
 			vLItemsHash={vLItemsHash}
+			initiateReferral={initiateReferral}
 			mode={mode}
 			modePrior={modePrior}
 			openItem={openDeal}

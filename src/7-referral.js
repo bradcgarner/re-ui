@@ -1,15 +1,31 @@
+import { useState } from "react";
+
 export default function Referral(props) {
 	const {
 		goToMainMenu,
 		referralBasket,
 		contactsHash,
 		handleReferralBasket,
+		editVPReferrals,
 		openContact,
 		getReferralInfo,
 		vpReferrals,
 		sendReferral,
+		vpReferralSent,
+		modePrior,
+		listContacts,
+		listVPs,
+		listVPCategories,
+		logReferralActivity,
 	} = props;
 
+	const [editMode, setEditMode] = useState(false);
+
+	const _getReferralInfo = () => {
+		setEditMode(false);
+		getReferralInfo();
+	};
+	
 	const rb = referralBasket || {};
 	const rbTo = rb.to || {};
 	const rbIncl = rb.include || {};
@@ -25,6 +41,7 @@ export default function Referral(props) {
 		return contactsHash[k];
 	});
 
+	const referralBasketIsPopulated = referralBasket && referralBasket.to && Object.keys(referralBasket.to).length > 0 && referralBasket.include && Object.keys(referralBasket.include).length;
 	const referralsHaveLoaded = Array.isArray(vpReferrals) && vpReferrals.length > 0 ;
 
 	return <div className='g1'>
@@ -34,6 +51,21 @@ export default function Referral(props) {
 		<div onClick={()=>goToMainMenu()} className='button2'>
 			<p className='button2-text'>BACK TO MAIN MENU</p>
 		</div>
+
+		{
+			modePrior === 'contacts' || modePrior === 'contact' ?
+				<div onClick={()=>listContacts()} className='button2'>
+					<p className='button2-text'>Back To Contacts</p>
+				</div> :
+			modePrior === 'vps' ?
+				<div onClick={()=>listVPs()} className='button2'>
+					<p className='button2-text'>Back To Vendor Partners</p>
+				</div> :
+			modePrior === 'vp-categories' ?
+				<div onClick={()=>listVPCategories()} className='button2'>
+					<p className='button2-text'>Back To Vendor Partner Categories</p>
+				</div>: null
+		}
 
 		<h2 className="h2">Send Referral To:</h2>
 		{
@@ -110,11 +142,14 @@ export default function Referral(props) {
 			})
 		}
 
-		<div onClick={()=>getReferralInfo()} className='button2'>
-			<p className='button2-text'>{
-			referralsHaveLoaded ? 'UPDATE REFERRAL' : 'PREPARE REFERRAL'
-			}</p>
-		</div>
+		{
+			referralBasketIsPopulated ? 
+				<div onClick={()=>_getReferralInfo()} className='button2'>
+					<p className='button2-text'>{
+					referralsHaveLoaded ? 'RESET REFERRAL' : 'PREPARE REFERRAL'
+					}</p>
+				</div> : null
+		}
 
 		{
 			referralsHaveLoaded ?
@@ -122,30 +157,45 @@ export default function Referral(props) {
 				{
 					vpReferrals.map((r,i)=>{
 						return <div key={i} className='g2 g2-box g2-contact'>
-							<p>{r.sal} {r.dear},</p>
+							<p>EMAILS: {Array.isArray(r.emails) ? r.emails.join(', ') : 'MISSING EMAILS'}</p>
+							<p>SUBJECT: {r.subject}</p>
+							<p style={{borderBottom: '1px solid #ccc'}}>&nbsp;</p>
+							<br/>
+							<p>{r.sal} {r.names},</p>
 							<p>{r.message}</p>
+							<br/>
+							
+							<p style={{fontWeight: 'bold'}}>{r.name}</p>
+							<p>{r.email}</p>
+							<p>{r.phone}</p>
+							<br/>
+
 							{
-								Array.isArray(r.refs) ? r.refs.map((f,j)=>{
-									return <div key={j} className='ref g2'>
-										<p className='p3'>{f.co}</p>
-										<p className='p3'>{f.poc}</p>
-										<p className='p3'>{f.ph}</p>
-										<p className='p3'>{f.em}</p>
-										<p className='p3'>{f.url}</p>
-										<p className='p3'>Services: {f.cat}</p>
-										<p className='p3'>Areas Served: {f.area}</p>
-										<p className='p3'>{f.rev} <a href={f.revUrl} target="_blank">{f.revUrl}</a></p>
-										<p className='p3'>REFERENCES: </p>{
-											Array.isArray(f.refs) ? f.refs.map((x,l)=>{
-												return <div key={l} className='ref g2'>
+								Array.isArray(r.vps) ? r.vps.map((f,j)=>{
+									return <div key={j} className='g2-sub'>
+										<p style={{fontWeight: 'bold'}}>{f.co}</p>
+										<p>{f.cat}</p>
+										<p>{f.area}</p>
+										<p>{f.poc}</p>
+										<p>{f.ph}</p>
+										<p>{f.em}</p>
+										<p>{f.addr}</p>
+										<p>{f.url}</p>
+
+										<p>&nbsp;</p>
+										<p>REFERENCES FOR {f.co.toUpperCase()}:</p>{
+											Array.isArray(f.vp_refs) ? f.vp_refs.map((x,l)=>{
+												return <div key={l} className='g2'>
 													<p className='p4'>{x.rev}</p>
 													<p className='p4 p4-right'>- {x.by}</p>
 												</div>
 											}) : null
 										}
+										<p>{f.rev} <a href={f.revUrl} target="_blank" rel="noreferrer">{f.revUrl}</a></p>
 									</div>
 								}) : null 
 							}
+							<p>{r.note}</p>
 						</div>
 					})
 				}
@@ -154,13 +204,113 @@ export default function Referral(props) {
 
 		{
 			referralsHaveLoaded ?
-				<div onClick={()=>sendReferral()} className='button2'>
-					<p className='button2-text'>SEND REFERRAL</p>
+				<div onClick={()=>setEditMode(!editMode)} className='button2'>
+					<p className='button2-text'>CUSTOM EDIT REFERRAL</p>
 				</div> : null 
 		}
 
-	</div> 
+		{
+			editMode ? 
+			<div className='g1'>
 
+				{
+					vpReferrals.map((r,i)=>{
+						return <div key={i} className='g2'>
+							<label className='label3'>
+								<input className='input3'
+									value={r.subject || ''}
+									onChange={e=>editVPReferrals(i, 'subject', null, null, null, null, e.target.value)}/>
+							</label>
+							<label className='label3'>
+								<input className='input3'
+									value={r.sal || ''}
+									onChange={e=>editVPReferrals(i, 'sal', null, null, null, null, e.target.value)}/>
+							</label>
+							<label className='label3'>
+								<input className='input3'
+									value={r.names || ''}
+									onChange={e=>editVPReferrals(i, 'names', null, null, null, null, e.target.value)}/>
+							</label>
+							<label className='label3'>
+								<textarea className='input3'
+									value={r.message || ''}
+									onChange={e=>editVPReferrals(i, 'message', null, null, null, null, e.target.value)}/>
+							</label>
+							<label className='label3'>
+								<input className='input3'
+									value={r.name || ''}
+									onChange={e=>editVPReferrals(i, 'name', null, null, null, null, e.target.value)}/>
+							</label>
+							<label className='label3'>
+								<input className='input3'
+									value={r.email || ''}
+									onChange={e=>editVPReferrals(i, 'email', null, null, null, null, e.target.value)}/>
+							</label>
+							<label className='label3'>
+								<input className='input3'
+									value={r.phone || ''}
+									onChange={e=>editVPReferrals(i, 'phone', null, null, null, null, e.target.value)}/>
+							</label>
+							{
+								Array.isArray(r.vps) ? r.vps.map((f,j)=>{
+									return <div key={j} className='g2-sub'>
+										<p>{f.co}</p>
+										<p>{f.poc}</p>
+										<p>{f.ph}</p>
+										<p>{f.em}</p>
+										<p>{f.addr}</p>
+										<p>{f.url}</p>
+										<label className='label3'>
+											<textarea className='input3'
+												value={f.cat || ''}
+												onChange={e=>editVPReferrals(i, 'vps', j, 'cat', null, null, e.target.value)}/>
+										</label>
+										<label className='label3'>
+											<textarea className='input3'
+												value={f.area || ''}
+												onChange={e=>editVPReferrals(i, 'vps', j, 'area', null, null, e.target.value)}/>
+										</label>
+										<label className='label3'>
+											<textarea className='input3'
+												value={f.rev || ''}
+												onChange={e=>editVPReferrals(i, 'vps', j, 'rev', null, null, e.target.value)}/>
+										</label>
+										<a href={f.revUrl} target="_blank" rel="noreferrer">{f.revUrl}</a>
+										<p>&nbsp;</p>
+										<p>REFERENCES FOR {f.co.toUpperCase()}: </p>{
+											Array.isArray(f.vp_refs) ? f.vp_refs.map((x,l)=>{
+												return <div key={l} className='g2'>
+													<p className='p4'>{x.rev}</p>
+													<p className='p4 p4-right'>- {x.by}</p>
+												</div>
+											}) : null
+										}
+									</div>
+								}) : null 
+							}
+							<label className='label3'>
+								<textarea className='input3'
+									value={r.note || ''}
+									onChange={e=>editVPReferrals(i, 'note', null, null, null, null, e.target.value)}/>
+							</label>
+						</div>
+					})
 
-	
+				}
+
+			</div> : null
+		}
+
+		{
+			referralsHaveLoaded && !vpReferralSent ?
+				<div onClick={()=>sendReferral()} className='button2'>
+					<p className='button2-text'>SEND REFERRAL</p>
+				</div> : 
+				referralsHaveLoaded && vpReferralSent ?
+				<div onClick={()=>logReferralActivity()} className='button2'>
+					<p className='button2-text'>LOG REFERRAL AS ACTIVITY</p>
+				</div> : null 
+		}
+
+	</div> 	
 }

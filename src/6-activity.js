@@ -22,7 +22,7 @@ export default function Activity(props) {
 		addDealToActivity,
 		activity,
 		optionsHash,
-		dealStatusHash,
+		convoDealFoundHash,
 		// vLItemsHash, 
 		referralHash,
 		vpReferenceHash,
@@ -40,6 +40,7 @@ export default function Activity(props) {
 		openContact,
 		openActivity,
 		processVPReferences,
+		vpAppStatusHash,
 	} = props;
 
 	const [showInstructions, setShowInstructions] = useState(false);
@@ -54,14 +55,13 @@ export default function Activity(props) {
 	const isAFollowUp = !!activity.date_fu_timestamp;
 	const hasNoDate = !date_convo.date_convo_timestamp;
 
-	const dealLinkButtonStatus = dealStatusHash[activity.convo_deal_found];
+	const dealLinkButtonStatus = convoDealFoundHash[activity.convo_deal_found];
 
 	const vpShowApplication = vpShowApplicationHash[`${activity.convo_main_purpose}`];
 	const contactVPAppIsLoaded = !!contactVPApp.id_contact;
 	const firstContact = contacts[0] || {};
 	const firstContactId = firstContact.id_contact;
 	const firstContactName = firstContact.contact_company || `${firstContact.contact_name_first} ${firstContact.contact_name_last}`;
-	const vpAppStatusHash = contactVPApp.vpAppStatusHash || {};
 	const vp_app_status = contactVPApp.vp_app_status;
 	const vpAppStatus = vpAppStatusHash[`${vp_app_status}`] || {};
 	const vpAppStatusLabel = vpAppStatus.label || '';
@@ -152,15 +152,18 @@ export default function Activity(props) {
 								{optionsHash['convo main purpose']}
 						</select>
 					</label>
-					<label className='label3'>
-						Related To A Deal
-						<select className='input3'
-							value={activity.id_deal_fu || ''}
-							style={formatStyle(activity.id_deal_fu)}
-							readOnly >
-								{optionsHash.deal}
-						</select>
-					</label>
+					{
+						activity.id_deal_fu ?
+						<label className='label3'>
+							Related To A Deal
+							<select className='input3'
+								value={activity.id_deal_fu || ''}
+								style={formatStyle(activity.id_deal_fu)}
+								readOnly >
+									{optionsHash.deal}
+							</select>
+						</label> : null
+					}
 					<label className='label3'>
 						Notes For Follow-Up
 						<textarea className='input3 input-taller'
@@ -645,7 +648,7 @@ export default function Activity(props) {
 								<p className='button4-text'>
 									Create Connections and Follow-Ups For All 3 VP References
 								</p>
-						</div> : null
+							</div> : null
 					}
 				<div className='divider'/>
 			</div> : null 

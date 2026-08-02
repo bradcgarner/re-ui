@@ -238,34 +238,34 @@ export const theFields = {
 			fieldName: 'contactNameCompany', 
 			label: 'contact', 
 		},
-		{
-			fieldName: 'contactNotes', 
-			label: 'notes', 
-			limit: 50,
-		},
-		{
-			fieldName: 'contact_phone', 
-			label: 'phone', 
-		},
-		{
-			fieldName: 'contact_email', 
-			label: 'email', 
-		},
+		// {
+		// 	fieldName: 'contactNotes', 
+		// 	label: 'notes', 
+		// 	limit: 50,
+		// },
+		// {
+		// 	fieldName: 'contact_phone', 
+		// 	label: 'phone', 
+		// },
+		// {
+		// 	fieldName: 'contact_email', 
+		// 	label: 'email', 
+		// },
 		{
 			fieldName: 'contact_how_met', 
 			label: 'how met', 
 			fd: 'vl',
 		},
-		{
-			fieldName: 'contact_where_met', 
-			label: 'where met', 
-			fd: 'vl'
-		},
-		{
-			fieldName: 'contact_vp_status', 
-			label: 'vp status',
-			fd: 'vl',
-		},
+		// {
+		// 	fieldName: 'contact_where_met', 
+		// 	label: 'where met', 
+		// 	fd: 'vl'
+		// },
+		// {
+		// 	fieldName: 'contact_vp_status', 
+		// 	label: 'vp status',
+		// 	fd: 'vl',
+		// },
 		{
 			fieldName: 'contact_vp_categories', 
 			label: 'vp categories',
@@ -279,10 +279,10 @@ export const theFields = {
 			label: 'tags',
 			limit: 75,
 		},
-		{
-			fieldName: 'contact_address_street', 
-			label: 'street',
-		},
+		// {
+		// 	fieldName: 'contact_address_street', 
+		// 	label: 'street',
+		// },
 		{
 			fieldName: 'contact_address_city', 
 			label: 'city',
@@ -291,22 +291,22 @@ export const theFields = {
 			fieldName: 'contact_address_state', 
 			label: 'state',
 		},
-		{
-			fieldName: 'contact_address_zip', 
-			label: 'zip',
-		},
-		{
-			fieldName: 'contact_birth_month', 
-			label: 'birth month',
-		},
-		{
-			fieldName: 'contact_birth_day', 
-			label: 'birth day',
-		},
-		{
-			fieldName: 'contact_birth_year', 
-			label: 'birth year',
-		},
+		// {
+		// 	fieldName: 'contact_address_zip', 
+		// 	label: 'zip',
+		// },
+		// {
+		// 	fieldName: 'contact_birth_month', 
+		// 	label: 'birth month',
+		// },
+		// {
+		// 	fieldName: 'contact_birth_day', 
+		// 	label: 'birth day',
+		// },
+		// {
+		// 	fieldName: 'contact_birth_year', 
+		// 	label: 'birth year',
+		// },
 		{
 			fieldName: 'id_contact', 
 		},
@@ -373,6 +373,32 @@ export const theFields = {
 			fieldName: 'timestamp_created', 
 			label: 'ts created',
 			fd: 'date',
+		},
+	],
+	vpApps: [
+		{
+			fieldName: 'vp_name_business', 
+			label: 'business', 
+		},
+		{
+			fieldName: 'vp_app_status', 
+			label: 'status', 
+			fd: 'vp',
+		},
+		{
+			fieldName: 'ts', 
+			label: 'latest date', 
+			fd: 'date'
+		},
+		{
+			fieldName: 'ts_sent', 
+			label: 'sent', 
+			fd: 'date'
+		},
+		{
+			fieldName: 'id_contact', 
+			label: 'contact', 
+			fd: 'ct'
 		},
 	],
 	deals: [

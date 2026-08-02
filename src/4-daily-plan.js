@@ -177,7 +177,7 @@ export default function DailyPlan(props) {
 				text={'Write specifically about what you plan to do today that affects your future self. How are you feeling about your path to somewhere very specific?</span> What are you doing to get there?'}/>
 
 			<label className='label3'>
-				Today My Future Self Says 
+				Positive Message To Myself 
 				<textarea className='input-tallest input3'
 					value={dailyPlan.dp_future_self || ''}
 					onChange={e=>handleDailyPlanChange('dp_future_self', e.target.value)}/>
@@ -274,7 +274,7 @@ export default function DailyPlan(props) {
 						console.log(f.date_fu_timestamp, theDate)
 						return <p key={i} className='p-dp-fus'>
 							{theDate}{` `}
-							{f.contactName}{`: `}
+							{f.contactNameCompany}{`: `}
 							{f.fu_notes}
 						</p>
 					})
